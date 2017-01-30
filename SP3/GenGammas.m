@@ -1,10 +1,10 @@
 function G = GenGammas(Jx,Jy,Jz,Jxz)
-G0 = Jxx*Jy-Jxz^2;
+G0 = Jx*Jy-Jxz^2;
 G(1) = Jxz*(Jx-Jy+Jz)/G0;
 G(2) = (Jz*(Jz-Jy)+Jxz^2)/G0;
 G(3) = Jz/G0;
 G(4) = Jxz/G0;
 G(5) = (Jz-Jx)/Jy;
-G(6) = Jxy/Jy;
+G(6) = Jxz/Jy;
 G(7) = ((Jx-Jy)*Jx+Jxz^2)/G0;
 G(8) = Jx/G0;
