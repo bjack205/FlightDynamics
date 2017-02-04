@@ -43,7 +43,7 @@ function out = forces_moments(x, delta, wind, P)
     
     %% Compute wind data in NED
     % Convert wind to body frame
-    Vgust = R'*[u_wg; v_wg; w_wg];
+    Vgust = R'*[u_wg; v_wg; w_wg]*0;
     Vws_b = R'*[w_ns;w_es;w_ds];
     Vw_b = Vws_b + Vgust;
     

@@ -29,6 +29,9 @@ if t==0,
     vehicle_handle = drawVehicleBody(Vertices,Faces,facecolors,...
         pn,pe,pd,phi,theta,psi,...
         []);
+    ground = 1e9;
+    alt = 100;
+    patch([ground, ground,-ground,-ground],[ground,-ground,-ground,ground],-[alt alt alt alt],[0 0.5 0])
     title('Vehicle')
     xlabel('East')
     ylabel('North')
@@ -38,13 +41,16 @@ if t==0,
     axis([-10,10,-10,10,-10,10]);
     l = light('Position',[-0.4 0.2 0.9],'Style','infinite');
     lighting gouraud
+    grid on
     hold on
     
     % at every other time step, redraw base and rod
 else
+    FollowPlane(vehicle_handle,pn,pe,pd)
     drawVehicleBody(Vertices,Faces,facecolors,...
         pn,pe,pd,phi,theta,psi,...
         vehicle_handle);
+    
 end
 end
 
@@ -77,6 +83,12 @@ else
     set(handle,'Vertices',V','Faces',F);
     drawnow
 end
+end
+
+function FollowPlane(vehicle_handle,pn,pe,pd)
+xlim(vehicle_handle.Parent,pe+[-10 10])
+ylim(vehicle_handle.Parent,pn+[-10 10])
+zlim(vehicle_handle.Parent,-pd+[-10 10])
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%
