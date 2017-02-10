@@ -128,6 +128,10 @@ function sys=mdlDerivatives(t,x,uu, P)
     u     = x(4);
     v     = x(5);
     w     = x(6);
+    e0    = x(7);
+    e1    = x(8);
+    e2    = x(9);
+    e3    = x(10);
     e     = x(7:10);
     p     = x(11);
     q     = x(12);
@@ -143,9 +147,9 @@ function sys=mdlDerivatives(t,x,uu, P)
     [~,enorm] = quatnorm(e');
     gamma = eye(4)*P.gamma*(1-enorm^2);
     
-    pneddot = [e(2)^2 + e(1)^2 - e(3)^2 - e(4)^2 2*(e(2)*e(3)-e(4)*e(1))     2*(e(2)*e(4)+e(3)*e(1));...
-              2*(e(2)*e(3)+e(4)*e(1))            e(3)^2+e(1)^2-e(2)^2-e(4)^2 2*(e(3)*e(4)-e(2)*e(1));...
-              2*(e(2)*e(4)-e(3)*e(1))            2*(e(3)*e(4)+e(2)*e(1))     e(4)^2+e(1)^2-e(2)^2-e(3)^2] * [u;v;w];
+    pneddot = [e1^2+e0^2-e2^2-e3^2       2*(e1*e2-e3*e0)       2*(e1*e3+e2*e0);...
+              2*(e1*e2+e3*e0)            (e2^2+e0^2-e1^2-e3^2) 2*(e2*e3-e1*e0);...
+              2*(e1*e3-e2*e0)            2*(e2*e3+e1*e0)       e2^2+e0^2-e1^2-e2^2] * [u;v;w];
     uvwdot = [r*v-q*w;...
               p*w-r*u;...
               q*u-p*v] + [fx;fy;fz]/P.mass;
@@ -160,7 +164,11 @@ function sys=mdlDerivatives(t,x,uu, P)
               [G(3)*ell+G(4)*n;...
                m/P.Jy;...
                G(4)*ell+G(8)*n];
-    
+           
+    pndot = (e1^2+e0^2-e2^2-e3^2)*u + 2*(e1*e2-e3*e0)*v + 2*(e1*e3+e2*e0)*w;
+    pedot = 2*(e1*e2+e3*e0)*u + (e2^2+e0^2-e1^2-e3^2)*v + 2*(e2*e3-e1*e0)*w;
+    pddot =-2*(e1*e3-e2*e0)*u - 2*(e2*e3+e1*e0)*v - (e3^2+e0^2-e1^2-e2^2)*w;
+    udot = r*v-q*w+2*P.g*(e1*e2-e2*e0);
 
 sys = [pneddot; uvwdot; edot; pqrdot];
 
