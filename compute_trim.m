@@ -6,16 +6,14 @@ function [x_trim,u_trim] = compute_trim(filename, Va, gamma, R)
 
 
 % add stuff here
-e = euler2quat(0,gamma,0);
-x0 = [0;0;0; Va;0;0; e'; 0;0;0];
+x0 = [0;0;0; Va;0;0; 0;gamma;0; 0;0;0];
 ix0 = [];
 u0 = [0;0;0;1];
 iu0 = [];
 y0 = [Va; gamma; 0];
 iy0 = [1,3];
-edot = euler2quat(0,0,Va/R*cos(gamma));
-dx0 = [0;0;-Va*sin(gamma); 0;0;0; edot'; 0;0;0];
-idx = [3:13];
+dx0 = [0;0;-Va*sin(gamma); 0;0;0; 0;0;Va/R; 0;0;0];
+idx = [3:12];
 
 % x0 = [0;0;0; Va;0;0; 0;gamma;0; 0;0;0];
 % dx0 = [0;0;-Va*sin(gamma); 0;0;0; 0;0;Va/R; 0;0;0];

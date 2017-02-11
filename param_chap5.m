@@ -101,8 +101,6 @@ P.r0     = 0;  % initial body frame yaw rate
 P.u_trim = u_trim;
 P.x_trim = x_trim;
 
-return;
-
 % set initial conditions to trim conditions
 % initial conditions
 P.pn0    = 0;  % initial North position
@@ -118,11 +116,11 @@ P.p0     = x_trim(10);  % initial body frame roll rate
 P.q0     = x_trim(11);  % initial body frame pitch rate
 P.r0     = x_trim(12);  % initial body frame yaw rate
 
+return
 % compute different transfer functions
 [T_phi_delta_a,T_chi_phi,T_theta_delta_e,T_h_theta,T_h_Va,T_Va_delta_t,T_Va_theta,T_v_delta_r]...
     = compute_tf_model(x_trim,u_trim,P);
 
-return;
 % linearize the equations of motion around trim conditions
 [A_lon, B_lon, A_lat, B_lat] = compute_ss_model('mavsim_trim',x_trim,u_trim);
 

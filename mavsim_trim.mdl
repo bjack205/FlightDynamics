@@ -2,7 +2,7 @@ Model {
   Name			  "mavsim_trim"
   Version		  8.7
   MdlSubVersion		  1
-  SavedCharacterEncoding  "windows-1252"
+  SavedCharacterEncoding  "UTF-8"
   GraphicalInterface {
     NumRootInports	    4
     Inport {
@@ -49,7 +49,7 @@ Model {
       UnitExpr		      "inherit"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.182"
+    ComputedModelVersion    "1.184"
     NumModelReferences	    0
     NumTestPointedSignals   0
     NumProvidedFunctions    0
@@ -65,7 +65,7 @@ Model {
   FPTRunName		  "Run 1"
   MaxMDLFileLineLength	  120
   InitFcn		  "aerosonde"
-  LastSavedArchitecture	  "win64"
+  LastSavedArchitecture	  "glnxa64"
   Object {
     $PropName		    "BdWindowsInfo"
     $ObjectID		    1
@@ -92,28 +92,16 @@ Model {
 	$ClassName		"Simulink.ExplorerBarInfo"
 	Visible			[1]
       }
-      Array {
-	Type			"Simulink.EditorInfo"
-	Dimension		2
-	Object {
-	  $ObjectID		  5
-	  IsActive		  [1]
-	  ViewObjType		  "SimulinkTopLevel"
-	  LoadSaveID		  "0"
-	  Extents		  [1349.0, 664.0]
-	  ZoomFactor		  [1.25]
-	  Offset		  [-68.891711445021, -16.027327781983313]
-	}
-	Object {
-	  $ObjectID		  6
-	  IsActive		  [0]
-	  ViewObjType		  "SimulinkSubsys"
-	  LoadSaveID		  "8"
-	  Extents		  [1167.0, 550.0]
-	  ZoomFactor		  [1.0]
-	  Offset		  [0.0, 0.0]
-	}
-	PropName		"EditorsInfo"
+      Object {
+	$PropName		"EditorsInfo"
+	$ObjectID		5
+	$ClassName		"Simulink.EditorInfo"
+	IsActive		[1]
+	ViewObjType		"SimulinkTopLevel"
+	LoadSaveID		"0"
+	Extents			[1345.0, 649.0]
+	ZoomFactor		[1.25]
+	Offset			[-68.891711445020974, -16.027327781983331]
       }
     }
   }
@@ -121,11 +109,11 @@ Model {
   Creator		  "beard"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "Brian Jackson"
+  LastModifiedBy	  "bjack205"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Feb 09 07:34:56 2017"
-  RTWModifiedTimeStamp	  408526491
-  ModelVersionFormat	  "1.%<AutoIncrement:182>"
+  LastModifiedDate	  "Fri Feb 10 10:51:38 2017"
+  RTWModifiedTimeStamp	  408624428
+  ModelVersionFormat	  "1.%<AutoIncrement:184>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -173,7 +161,7 @@ Model {
   TryForcingSFcnDF	  off
   Object {
     $PropName		    "DataLoggingOverride"
-    $ObjectID		    7
+    $ObjectID		    6
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
     model_		    "mavsim_trim"
     Array {
@@ -216,13 +204,13 @@ Model {
     Type		    "Handle"
     Dimension		    1
     Simulink.ConfigSet {
-      $ObjectID		      8
+      $ObjectID		      7
       Version		      "1.16.2"
       Array {
 	Type			"Handle"
 	Dimension		9
 	Simulink.SolverCC {
-	  $ObjectID		  9
+	  $ObjectID		  8
 	  Version		  "1.16.2"
 	  StartTime		  "0.0"
 	  StopTime		  "10000"
@@ -259,7 +247,7 @@ Model {
 	  InsertRTBMode		  "Whenever possible"
 	}
 	Simulink.DataIOCC {
-	  $ObjectID		  10
+	  $ObjectID		  9
 	  Version		  "1.16.2"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
@@ -297,7 +285,7 @@ Model {
 	  LoggingIntervals	  "[-inf, inf]"
 	}
 	Simulink.OptimizationCC {
-	  $ObjectID		  11
+	  $ObjectID		  10
 	  Version		  "1.16.2"
 	  Array {
 	    Type		    "Cell"
@@ -350,7 +338,7 @@ Model {
 	  AccelVerboseBuild	  off
 	}
 	Simulink.DebuggingCC {
-	  $ObjectID		  12
+	  $ObjectID		  11
 	  Version		  "1.16.2"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
@@ -445,7 +433,7 @@ Model {
 	  AllowAutomaticUnitConversions	on
 	}
 	Simulink.HardwareCC {
-	  $ObjectID		  13
+	  $ObjectID		  12
 	  Version		  "1.16.2"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
@@ -487,7 +475,7 @@ Model {
 	  UseSimulinkCoderFeatures on
 	}
 	Simulink.ModelReferenceCC {
-	  $ObjectID		  14
+	  $ObjectID		  13
 	  Version		  "1.16.2"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
 	  EnableRefExpFcnMdlSchedulingChecks on
@@ -503,7 +491,7 @@ Model {
 	  SupportModelReferenceSimTargetCustomCode off
 	}
 	Simulink.SFSimCC {
-	  $ObjectID		  15
+	  $ObjectID		  14
 	  Version		  "1.16.2"
 	  SFSimEcho		  on
 	  SimCtrlC		  on
@@ -515,7 +503,7 @@ Model {
 	}
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
-	  $ObjectID		  16
+	  $ObjectID		  15
 	  Version		  "1.16.2"
 	  Array {
 	    Type		    "Cell"
@@ -574,7 +562,7 @@ Model {
 	    Type		    "Handle"
 	    Dimension		    2
 	    Simulink.CodeAppCC {
-	      $ObjectID		      17
+	      $ObjectID		      16
 	      Version		      "1.16.2"
 	      Array {
 		Type			"Cell"
@@ -638,7 +626,7 @@ Model {
 	    }
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
-	      $ObjectID		      18
+	      $ObjectID		      17
 	      Version		      "1.16.2"
 	      Array {
 		Type			"Cell"
@@ -723,7 +711,7 @@ Model {
 	  }
 	}
 	SlCovCC.ConfigComp {
-	  $ObjectID		  19
+	  $ObjectID		  18
 	  Version		  "1.16.2"
 	  Description		  "Simulink Coverage Configuration Component"
 	  Name			  "Simulink Coverage"
@@ -765,11 +753,11 @@ Model {
   }
   Simulink.ConfigSet {
     $PropName		    "ActiveConfigurationSet"
-    $ObjectID		    8
+    $ObjectID		    7
   }
   Object {
     $PropName		    "DataTransfer"
-    $ObjectID		    20
+    $ObjectID		    19
     $ClassName		    "Simulink.GlobalDataTransfer"
     DefaultTransitionBetweenSyncTasks "Ensure deterministic transfer (maximum delay)"
     DefaultTransitionBetweenAsyncTasks "Ensure data integrity only"
@@ -963,7 +951,7 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "125"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "104"
+    SIDHighWatermark	    "106"
     Block {
       BlockType		      Inport
       Name		      "delta_e"
@@ -1026,13 +1014,13 @@ Model {
       Ports		      [1, 1]
       Position		      [615, 117, 710, 173]
       ZOrder		      2
-      FunctionName	      "mav_dynamics"
+      FunctionName	      "mav_dynamics_euler"
       Parameters	      "P"
       SFunctionDeploymentMode off
       EnableBusSupport	      off
       Object {
 	$PropName		"MaskObject"
-	$ObjectID		21
+	$ObjectID		20
 	$ClassName		"Simulink.Mask"
       }
     }
@@ -1047,8 +1035,8 @@ Model {
       Variant		      off
       System {
 	Name			"Forces & Moments"
-	Location		[683, 0, 1366, 728]
-	Open			on
+	Location		[141, 145, 1560, 1035]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1220,6 +1208,16 @@ Model {
       OutputSizes	      "1"
     }
     Block {
+      BlockType		      MATLABFcn
+      Name		      "euler2quat"
+      SID		      "105"
+      Ports		      [1, 1]
+      Position		      [485, 70, 555, 100]
+      ZOrder		      17
+      BlockMirror	      on
+      MATLABFcn		      "euler2quat_state"
+    }
+    Block {
       BlockType		      Outport
       Name		      "Va"
       SID		      "102"
@@ -1250,8 +1248,8 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Dynamics"
       SrcPort		      1
-      Points		      [10, 0; 0, -60; -350, 0; 0, 50]
-      DstBlock		      "Forces & Moments"
+      Points		      [10, 0; 0, -60]
+      DstBlock		      "euler2quat"
       DstPort		      1
     }
     Line {
@@ -1357,10 +1355,18 @@ Model {
       DstBlock		      "beta"
       DstPort		      1
     }
+    Line {
+      ZOrder		      98
+      SrcBlock		      "euler2quat"
+      SrcPort		      1
+      Points		      [-105, 0; 0, 50]
+      DstBlock		      "Forces & Moments"
+      DstPort		      1
+    }
     Annotation {
       SID		      "67"
       Name		      "Forces & Moments"
-      Position		      [509, 127, 597, 142]
+      Position		      [509, 127, 594, 141]
       InternalMargins	      [0, 0, 0, 0]
       FixedHeight	      off
       FixedWidth	      off
@@ -1369,7 +1375,7 @@ Model {
     Annotation {
       SID		      "68"
       Name		      "States"
-      Position		      [684, 64, 715, 79]
+      Position		      [684, 64, 714, 78]
       InternalMargins	      [0, 0, 0, 0]
       FixedHeight	      off
       FixedWidth	      off
