@@ -60,13 +60,13 @@ function out = forces_moments(x, delta, wind, P)
     
     % compute external forces and torques on aircraft
     
-    % Gravity force
+    %% Gravity force
     mg = P.mass*P.g;
     F_g = mg*[2*(e1*e3-e2*e0);...
             2*(e2*e3+e1*e0);...
             e3^2+e0^2-e1^2-e2^2];
 
-    % Aerodynamic Forces
+    %% Aerodynamic Forces
     AR = P.b^2/P.S_wing;
     sigma = @(alpha) (1+exp(-P.M*(alpha-P.alpha0)) + exp(P.M*(alpha+P.alpha0))) / ...
         ((1+exp(-P.M*(alpha-P.alpha0))) * (1+exp(P.M*(alpha+P.alpha0))));
@@ -104,7 +104,10 @@ function out = forces_moments(x, delta, wind, P)
         Torque = zeros(3,1);
     end
     
-
+    if beta*180/pi > 0.2
+        a = 1;
+    end
+    
     out = [Force; Torque; Va; alpha; beta; R*Vw_b];
 end
 

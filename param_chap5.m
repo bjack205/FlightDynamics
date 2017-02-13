@@ -1,3 +1,4 @@
+addpath('utils')
 P.g = 9.8;
    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -72,13 +73,13 @@ P.sigma_w = .7;
 
 % compute trim conditions using 'mavsim_chap5_trim.slx'
 % initial airspeed
-P.Va0 = 17;
-gamma = 5*pi/180*0;  % desired flight path angle (radians)
-R     = Inf;         % desired radius (m) - use (+) for right handed orbit, 
+P.Va0 = 35;
+gamma = 00*pi/180;  % desired flight path angle (radians)
+R     = Inf ;         % desired radius (m) - use (+) for right handed orbit, 
 
 % autopilot sample rate
 P.Ts = 0.01;
-P.gamma = 100;
+P.lambda = 100;
 
 % first cut at initial conditions
 P.pn0    = 0;  % initial North position
@@ -98,6 +99,29 @@ P.r0     = 0;  % initial body frame yaw rate
 
 % run trim commands
 [x_trim, u_trim]=compute_trim('mavsim_trim',P.Va0,gamma,R);
+%u_trim(2:3) = 0;
+
+% x_trim = [
+%     0.0001
+%    -0.0003
+%    35.0000
+%     3.7434
+%     0.0628
+%    -0.1143
+%    -0.1687
+%     0.6443
+%    -0.5560
+%    -0.5018
+%    -1.1452
+%     1.2489
+%     0.9532
+% x_trim = quat2euler_state(x_trim);
+% 
+% u_trim =[
+%    -2.5513
+%     0.9808
+%    -1.7004
+%     0.3654];
 P.u_trim = u_trim;
 P.x_trim = x_trim;
 

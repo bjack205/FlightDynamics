@@ -2,7 +2,7 @@ Model {
   Name			  "mavsim_trim"
   Version		  8.7
   MdlSubVersion		  1
-  SavedCharacterEncoding  "UTF-8"
+  SavedCharacterEncoding  "windows-1252"
   GraphicalInterface {
     NumRootInports	    4
     Inport {
@@ -49,7 +49,7 @@ Model {
       UnitExpr		      "inherit"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.184"
+    ComputedModelVersion    "1.185"
     NumModelReferences	    0
     NumTestPointedSignals   0
     NumProvidedFunctions    0
@@ -65,7 +65,7 @@ Model {
   FPTRunName		  "Run 1"
   MaxMDLFileLineLength	  120
   InitFcn		  "aerosonde"
-  LastSavedArchitecture	  "glnxa64"
+  LastSavedArchitecture	  "win64"
   Object {
     $PropName		    "BdWindowsInfo"
     $ObjectID		    1
@@ -109,11 +109,11 @@ Model {
   Creator		  "beard"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "bjack205"
+  LastModifiedBy	  "Brian Jackson"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Feb 10 10:51:38 2017"
-  RTWModifiedTimeStamp	  408624428
-  ModelVersionFormat	  "1.%<AutoIncrement:184>"
+  LastModifiedDate	  "Sat Feb 11 15:15:10 2017"
+  RTWModifiedTimeStamp	  408726848
+  ModelVersionFormat	  "1.%<AutoIncrement:185>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -938,7 +938,7 @@ Model {
   System {
     Name		    "mavsim_trim"
     Location		    [151, 155, 1550, 997]
-    Open		    on
+    Open		    off
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
@@ -1366,7 +1366,7 @@ Model {
     Annotation {
       SID		      "67"
       Name		      "Forces & Moments"
-      Position		      [509, 127, 594, 141]
+      Position		      [509, 127, 597, 142]
       InternalMargins	      [0, 0, 0, 0]
       FixedHeight	      off
       FixedWidth	      off
@@ -1375,7 +1375,7 @@ Model {
     Annotation {
       SID		      "68"
       Name		      "States"
-      Position		      [684, 64, 714, 78]
+      Position		      [684, 64, 715, 79]
       InternalMargins	      [0, 0, 0, 0]
       FixedHeight	      off
       FixedWidth	      off

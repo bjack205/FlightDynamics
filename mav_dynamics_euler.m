@@ -148,8 +148,8 @@ function sys=mdlDerivatives(t,x,uu, P)
     gamma = eye(4)*P.gamma*(1-enorm^2);
     
     pneddot = [e1^2+e0^2-e2^2-e3^2       2*(e1*e2-e3*e0)       2*(e1*e3+e2*e0);...
-              2*(e1*e2+e3*e0)            (e2^2+e0^2-e1^2-e3^2) 2*(e2*e3-e1*e0);...
-              2*(e1*e3-e2*e0)            2*(e2*e3+e1*e0)       e2^2+e0^2-e1^2-e2^2] * [u;v;w];
+               2*(e1*e2+e3*e0)            (e2^2+e0^2-e1^2-e3^2) 2*(e2*e3-e1*e0);...
+               2*(e1*e3-e2*e0)            2*(e2*e3+e1*e0)      (e3^2+e0^2-e1^2-e2^2)] * [u;v;w];
     uvwdot = [r*v-q*w;...
               p*w-r*u;...
               q*u-p*v] + [fx;fy;fz]/P.mass;
@@ -168,10 +168,6 @@ function sys=mdlDerivatives(t,x,uu, P)
                m/P.Jy;...
                G(4)*ell+G(8)*n];
            
-    pndot = (e1^2+e0^2-e2^2-e3^2)*u + 2*(e1*e2-e3*e0)*v + 2*(e1*e3+e2*e0)*w;
-    pedot = 2*(e1*e2+e3*e0)*u + (e2^2+e0^2-e1^2-e3^2)*v + 2*(e2*e3-e1*e0)*w;
-    pddot =-2*(e1*e3-e2*e0)*u - 2*(e2*e3+e1*e0)*v - (e3^2+e0^2-e1^2-e2^2)*w;
-    udot = r*v-q*w+2*P.g*(e1*e2-e2*e0);
 
 sys = [pneddot; uvwdot; angdot; pqrdot];
 
