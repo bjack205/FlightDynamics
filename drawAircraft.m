@@ -23,7 +23,7 @@ persistent Faces
 persistent facecolors
 
 % first time function is called, initialize plot and persistent vars
-if t==0,
+if isempty(vehicle_handle),
     figure(1), clf
     [Vertices,Faces,facecolors] = defineVehicleBody;
     vehicle_handle = drawVehicleBody(Vertices,Faces,facecolors,...
