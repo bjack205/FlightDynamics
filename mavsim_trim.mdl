@@ -49,7 +49,7 @@ Model {
       UnitExpr		      "inherit"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.185"
+    ComputedModelVersion    "1.190"
     NumModelReferences	    0
     NumTestPointedSignals   0
     NumProvidedFunctions    0
@@ -64,7 +64,6 @@ Model {
   MinMaxOverflowArchiveMode "Overwrite"
   FPTRunName		  "Run 1"
   MaxMDLFileLineLength	  120
-  InitFcn		  "aerosonde"
   LastSavedArchitecture	  "win64"
   Object {
     $PropName		    "BdWindowsInfo"
@@ -99,7 +98,7 @@ Model {
 	IsActive		[1]
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
-	Extents			[1345.0, 649.0]
+	Extents			[1349.0, 667.0]
 	ZoomFactor		[1.25]
 	Offset			[-68.891711445020974, -16.027327781983331]
       }
@@ -111,9 +110,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "Brian Jackson"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Sat Feb 11 15:15:10 2017"
-  RTWModifiedTimeStamp	  408726848
-  ModelVersionFormat	  "1.%<AutoIncrement:185>"
+  LastModifiedDate	  "Tue Feb 21 21:45:08 2017"
+  RTWModifiedTimeStamp	  409614277
+  ModelVersionFormat	  "1.%<AutoIncrement:190>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -938,7 +937,7 @@ Model {
   System {
     Name		    "mavsim_trim"
     Location		    [151, 155, 1550, 997]
-    Open		    off
+    Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
