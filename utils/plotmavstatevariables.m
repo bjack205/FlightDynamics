@@ -1,6 +1,7 @@
 function plotMAVStateVariables(uu)
 %
 % modified 12/11/2009 - RB
+    isquat = 0;
 
     % process inputs to function
     pn          = uu(1);             % North position (meters)
@@ -30,33 +31,40 @@ function plotMAVStateVariables(uu)
     phi_c       = 180/pi*uu(25);     % commanded roll angle (degrees)   
     theta_c     = 180/pi*uu(26);     % commanded pitch angle (degrees)
     chi_c       = 180/pi*uu(27);     % commanded course (degrees)
-    p_c         = 180/pi*uu(28);     % commanded body angular rate along x-axis (degrees/s)
-    q_c         = 180/pi*uu(29);     % commanded body angular rate along y-axis (degrees/s)
-    r_c         = 180/pi*uu(30);     % commanded body angular rate along z-axis (degrees/s)
-    pn_hat      = uu(31);            % estimated North position (meters)
-    pe_hat      = uu(32);            % estimated East position (meters)
-    h_hat       = uu(33);            % estimated altitude (meters)
-    Va_hat      = uu(34);            % estimated airspeed (meters/s)
-    alpha_hat   = 180/pi*uu(35);     % estimated angle of attack (degrees)
-    beta_hat    = 180/pi*uu(36);     % estimated side slip angle (degrees)
-    phi_hat     = 180/pi*uu(37);     % estimated roll angle (degrees)   
-    theta_hat   = 180/pi*uu(38);     % estimated pitch angle (degrees)
-    chi_hat     = 180/pi*uu(39);     % estimated course (degrees)
-    p_hat       = 180/pi*uu(40);     % estimated body angular rate along x-axis (degrees/s)
-    q_hat       = 180/pi*uu(41);     % estimated body angular rate along y-axis (degrees/s)
-    r_hat       = 180/pi*uu(42);     % estimated body angular rate along z-axis (degrees/s)
-%    Vg_hat      = uu(43);            % estimated groundspeed
-%    wn_hat      = uu(44);            % estimated North wind
-%    we_hat      = uu(45);            % estimated East wind
-%    psi_hat     = 180/pi*uu(46);     % estimated heading
-%    bx_hat      = uu(47);            % estimated x-gyro bias
-%    by_hat      = uu(48);            % estimated y-gyro bias
-%    bz_hat      = uu(49);            % estimated z-gyro bias
-    delta_e     = 180/pi*uu(50);     % elevator angle (degrees)
-    delta_a     = 180/pi*uu(51);     % aileron angle (degrees)
-    delta_r     = 180/pi*uu(52);     % rudder angle (degrees)
-    delta_t     = uu(53);            % throttle setting (unitless)
-    t           = uu(54);            % simulation time
+%     e_c(1)      = uu(25);
+%     e_c(2)      = uu(26);
+%     e_c(3)      = uu(27);
+%     e_c(4)      = uu(28);
+    p_c         = 180/pi*uu(28+isquat);     % commanded body angular rate along x-axis (degrees/s)
+    q_c         = 180/pi*uu(29+isquat);     % commanded body angular rate along y-axis (degrees/s)
+    r_c         = 180/pi*uu(30+isquat);     % commanded body angular rate along z-axis (degrees/s)
+    pn_hat      = uu(31+isquat);            % estimated North position (meters)
+    pe_hat      = uu(32+isquat);            % estimated East position (meters)
+    h_hat       = uu(33+isquat);            % estimated altitude (meters)
+    Va_hat      = uu(34+isquat);            % estimated airspeed (meters/s)
+    alpha_hat   = 180/pi*uu(35+isquat);     % estimated angle of attack (degrees)
+    beta_hat    = 180/pi*uu(36+isquat);     % estimated side slip angle (degrees)
+    phi_hat     = 180/pi*uu(37+isquat);     % estimated roll angle (degrees)   
+    theta_hat   = 180/pi*uu(38+isquat);     % estimated pitch angle (degrees)
+    chi_hat     = 180/pi*uu(39+isquat);     % estimated course (degrees)
+    p_hat       = 180/pi*uu(40+isquat);     % estimated body angular rate along x-axis (degrees/s)
+    q_hat       = 180/pi*uu(41+isquat);     % estimated body angular rate along y-axis (degrees/s)
+    r_hat       = 180/pi*uu(42+isquat);     % estimated body angular rate along z-axis (degrees/s)
+%    Vg_hat      = uu(43+isquat);            % estimated groundspeed
+%    wn_hat      = uu(44+isquat);            % estimated North wind
+%    we_hat      = uu(45+isquat);            % estimated East wind
+%    psi_hat     = 180/pi*uu(46+isquat);     % estimated heading
+%    bx_hat      = uu(47+isquat);            % estimated x-gyro bias
+%    by_hat      = uu(48+isquat);            % estimated y-gyro bias
+%    bz_hat      = uu(49+isquat);            % estimated z-gyro bias
+    delta_e     = 180/pi*uu(50+isquat);     % elevator angle (degrees)
+    delta_a     = 180/pi*uu(51+isquat);     % aileron angle (degrees)
+    delta_r     = 180/pi*uu(52+isquat);     % rudder angle (degrees)
+    delta_t     = uu(53+isquat);            % throttle setting (unitless)
+    t           = uu(54+isquat);            % simulation time
+    
+    % Convert to euler angles
+    %[phi_c,theta_c,chi_c] = quat2euler(e_c);
     
     % compute course angle
     chi = 180/pi*atan2(Va*sin(psi)+we, Va*cos(psi)+wn);
