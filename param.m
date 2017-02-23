@@ -1,4 +1,6 @@
 addpath('utils')
+addpath('fncs')
+addpath('media')
 P.g = 9.8;
    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
