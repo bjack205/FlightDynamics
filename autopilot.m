@@ -65,7 +65,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P)
 
-    mode = 2;
+    mode = 6;
     switch mode
         case 1, % tune the roll loop
             phi_c = chi_c; % interpret chi_c to autopilot as course command
@@ -135,6 +135,18 @@ function [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta
             delta_e = pitch_hold(theta_c, theta, q, P);
             delta_r = 0; % no rudder
             % use trim values for elevator and throttle while tuning the lateral autopilot
+        case 6 % Tune pitch loop
+            theta_c = h_c; 
+            chi_c = 0;
+            phi_c = 0;
+            if t==0
+                delta_e = pitch_hold(theta_c, theta, q, 1, P);
+            else
+                delta_e = pitch_hold(theta_c, theta, q, 0, P);
+            end
+            delta_a = P.u_trim(2);
+            delta_t = P.u_trim(4);
+            delta_r = P.u_trim(3);
     end
     %----------------------------------------------------------
     % create outputs
@@ -315,14 +327,10 @@ delta_a = sat(u_unsat,P.delta_a_max);
 end
 
 function phi_c = course_hold(chi_c, chi, r, init, P)
-persistent I error_d1 I2 ax
+persistent I error_d1
 if init == 1
     I = 0;
-    D = 0;
     error_d1 = 0;
-    figure(3); clf
-    ax = axes;
-    I2 = 0;
 end
 error = chi_c - chi;
 I = I + (P.Ts/2)*(error + error_d1);
@@ -331,12 +339,21 @@ phi_c = sat(u_unsat,P.e_phi_max);
 if P.ki_chi~=0
     I = I + P.Ts/P.ki_chi * (phi_c-u_unsat);
 end
-I2 = [I2;chi*180/pi];
-plot(ax,I2)
 end
 
-function delta_e = pitch_hold(theta_c, theta, q, P)
-
+function delta_e = pitch_hold(theta_c, theta, q, init, P)
+persistent D error_d1
+if init == 1
+    D = 0;
+    error_d1 = 0;
+end
+if theta*180/pi > 45
+    a = 1;
+end
+error = theta_c - theta;
+D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
+u_unsat = P.kp_theta*error - P.kd_theta*q;
+delta_e = sat(u_unsat,P.delta_e_max);
 end
 
 function theta_c = altitude_hold(h_c, h, init, P)
