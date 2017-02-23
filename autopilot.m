@@ -65,7 +65,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P)
 
-    mode = 6;
+    mode = 7;
     switch mode
         case 1, % tune the roll loop
             phi_c = chi_c; % interpret chi_c to autopilot as course command
@@ -147,6 +147,21 @@ function [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta
             delta_a = P.u_trim(2);
             delta_t = P.u_trim(4);
             delta_r = P.u_trim(3);
+        case 7 % Tune Altitude hold
+            chi_c = 0;
+            phi_c = 0;
+            if t==0
+                theta_c = altitude_hold(h_c, h, 1, P);
+                delta_e = pitch_hold(theta_c, theta, q, 1, P);
+            else
+                theta_c = altitude_hold(h_c, h, 0, P);
+                delta_e = pitch_hold(theta_c, theta, q, 0, P);
+            end
+            delta_a = P.u_trim(2);
+            delta_t = P.u_trim(4);
+            delta_r = P.u_trim(3);
+            
+            
     end
     %----------------------------------------------------------
     % create outputs
@@ -347,9 +362,6 @@ if init == 1
     D = 0;
     error_d1 = 0;
 end
-if theta*180/pi > 45
-    a = 1;
-end
 error = theta_c - theta;
 D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
 u_unsat = P.kp_theta*error - P.kd_theta*q;
@@ -357,7 +369,18 @@ delta_e = sat(u_unsat,P.delta_e_max);
 end
 
 function theta_c = altitude_hold(h_c, h, init, P)
-
+persistent I error_d1
+if init == 1
+    I = 0;
+    error_d1 = 0;
+end
+error = h_c - h;
+I = I + (P.Ts/2)*(error + error_d1);
+u_unsat = P.kp_h*error + P.ki_h*I;
+theta_c = sat(u_unsat,P.e_theta_max);
+if P.ki_h~=0
+    I = I + P.Ts/P.ki_h * (theta_c-u_unsat);
+end
 end
 
 function theta_c = airspeed_with_pitch_hold(Va_c, Va, init, P)

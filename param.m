@@ -114,7 +114,7 @@ P.x_trim = x_trim;
 % initial conditions
 P.pn0    = 0;  % initial North position
 P.pe0    = 0;  % initial East position
-P.pd0    = 0;  % initial Down position (negative altitude)
+P.pd0    = -100;  % initial Down position (negative altitude)
 P.u0     = x_trim(4);  % initial velocity along body x-axis
 P.v0     = x_trim(5);  % initial velocity along body y-axis
 P.w0     = x_trim(6);  % initial velocity along body z-axis
@@ -146,11 +146,11 @@ P.e_beta_max = 15*pi/180;
 P.zeta_beta = 0.707;
 
 % Pitch attitude
-P.e_theta_max = 10*pi/180;
-P.zeta_theta = 0.707;
+P.e_theta_max = 20*pi/180;
+P.zeta_theta = 1.1;
 
-% Altitude attitude
-P.W_h = 10; % 15>x>5
+% Altitude hold
+P.W_h = 15; % 15>x>5
 P.zeta_h = 0.707;
 
 % Airspeed hold pitch
