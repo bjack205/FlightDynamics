@@ -36,7 +36,7 @@ a_beta1 = pVaS2m*P.C_Y_beta;
 a_beta2 = pVaS2m*P.C_Y_delta_r;
 d_beta = 1/Va_trim*(p*w-r*u + P.g*cos(theta)*sin(phi)) + pVaS2m*(P.C_Y_0 + P.C_Y_p*P.b*p/(2*Va_trim) + P.C_Y_r*P.b*r/(2*Va_trim) + P.C_Y_delta_a*delta_a);
 
-pVacS = -P.rho*Va_trim^2*P.c*P.S_wing/(2*P.Jy);
+pVacS = P.rho*Va_trim^2*P.c*P.S_wing/(2*P.Jy);
 a_theta1 = -pVacS*P.C_m_q*P.c/(2*Va_trim);
 a_theta2 = -pVacS*P.C_m_alpha;
 a_theta3 =  pVacS*P.C_m_delta_e;
