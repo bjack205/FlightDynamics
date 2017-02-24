@@ -233,6 +233,8 @@ function [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,thet
     % initialize persistent variable
     if t==0,
         init = true;
+        h = -P.pd0;
+        Va = P.Va0;
         state_names = {'Take_off';'Climb Zone';'Descend Zone';'Altitude Hold Zone'};
     end
     
@@ -248,7 +250,7 @@ function [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,thet
     end
     if prev_state ~= altitude_state
         init = true;
-        disp(state_names{altitude_state});
+        disp(state_names{altitude_state})
     end
     
     % implement state machine
@@ -428,7 +430,7 @@ end
 error = Va_c - Va;
 I = I + (P.Ts/2)*(error + error_d1);
 u_unsat = P.kp_v2*error + P.ki_v2*I;
-theta_c = sat(u_unsat, 70*pi/180);
+theta_c = sat(u_unsat, 80*pi/180);
 if P.ki_v2~=0
     I = I + P.Ts/P.ki_v2 * (theta_c-u_unsat);
 end

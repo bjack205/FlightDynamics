@@ -135,7 +135,7 @@ P.r0     = x_trim(12);  % initial body frame yaw rate
 
 % Longitudinal Control
 P.altitude_take_off_zone = 20;
-P.altitude_hold_zone = 10;
+P.altitude_hold_zone = 30;
 P.take_off_pitch = 45*pi/180;
 
 % Roll attitude
@@ -151,16 +151,16 @@ P.e_beta_max = 15*pi/180;
 P.zeta_beta = 0.707;
 
 % Pitch attitude
-P.e_theta_max = 20*pi/180;
+P.e_theta_max = 45*pi/180;
 P.zeta_theta = 0.707;
 
 % Altitude hold
-P.W_h = 15; % 15>x>5
-P.zeta_h = 0.9;
+P.W_h = 20; % 15>x>5
+P.zeta_h = 0.707;
 
 % Airspeed hold pitch
-P.W_v2 = 20;
-P.zeta_v2 = 0.707;
+P.W_v2 = 100;
+P.zeta_v2 = 0.9;
 
 % Airspeed hold throttle
 P.wn_v = 2;
