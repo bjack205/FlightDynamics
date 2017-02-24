@@ -65,7 +65,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P)
 
-    mode = 7;
+    mode = 4;
     switch mode
         case 1, % tune the roll loop
             phi_c = chi_c; % interpret chi_c to autopilot as course command
@@ -110,29 +110,32 @@ function [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta
             chi_c = 0;
             delta_t = P.u_trim(4);
             if t==0,
-                phi_c   = course_hold(chi_c, chi, r, 1, P);
-                theta_c = airspeed_with_pitch_hold(Va_c, Va, 1, P);
-           else
-                phi_c   = course_hold(chi_c, chi, r, 0, P);
-                theta_c = airspeed_with_pitch_hold(Va_c, Va, 0, P);
+                init = true;
+            else
+                init = false;
             end
-            delta_a = roll_hold(phi_c, phi, p, P);
-            delta_e = pitch_hold(theta_c, theta, q, P);
+            phi_c   = course_hold(chi_c, chi, r, init, P);
+            delta_a = roll_hold(phi_c, phi, p, init, P);
+            
+            theta_c = airspeed_with_pitch_hold(Va_c, Va, init, P);
+            delta_e = pitch_hold(theta_c, theta, q, init, P);
+            
             delta_r = 0; % no rudder
             % use trim values for elevator and throttle while tuning the lateral autopilot
         case 5, % tune the pitch to altitude loop 
             chi_c = 0;
             if t==0,
-                phi_c   = course_hold(chi_c, chi, r, 1, P);
-                theta_c = altitude_hold(h_c, h, 1, P);
-                delta_t = airspeed_with_throttle_hold(Va_c, Va, 1, P);
-           else
-                phi_c   = course_hold(chi_c, chi, r, 0, P);
-                theta_c = altitude_hold(h_c, h, 0, P);
-                delta_t = airspeed_with_throttle_hold(Va_c, Va, 0, P);
+                init = true;
+            else
+                init = false;
             end
-            delta_a = roll_hold(phi_c, phi, p, P);
-            delta_e = pitch_hold(theta_c, theta, q, P);
+            phi_c   = course_hold(chi_c, chi, r, init, P);
+            delta_a = roll_hold(phi_c, phi, p, init, P);
+            
+            delta_t = airspeed_with_throttle_hold(Va_c, Va, init, P);
+            %delta_t = P.u_trim(4);
+            theta_c = altitude_hold(h_c, h, init, P);
+            delta_e = pitch_hold(theta_c, theta, q, init, P);
             delta_r = 0; % no rudder
             % use trim values for elevator and throttle while tuning the lateral autopilot
         case 6 % Tune pitch loop
@@ -159,6 +162,20 @@ function [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta
             end
             delta_a = P.u_trim(2);
             delta_t = P.u_trim(4);
+            delta_r = P.u_trim(3);
+        case 8 % Speed with throttle
+            chi_c = 0;
+            if t==0,
+                init = true;
+            else
+                init = false;
+            end
+            phi_c   = course_hold(chi_c, chi, r, init, P);
+            delta_a = roll_hold(phi_c, phi, p, init, P);
+            
+            theta_c = 0;
+            delta_t = airspeed_with_throttle_hold(Va_c, Va, init, P);
+            delta_e = P.u_trim(1);
             delta_r = P.u_trim(3);
             
             
@@ -384,11 +401,34 @@ end
 end
 
 function theta_c = airspeed_with_pitch_hold(Va_c, Va, init, P)
-
+persistent I error_d1
+if init == 1
+    I = 0;
+    error_d1 = 0;
+end
+error = Va_c - Va;
+I = I + (P.Ts/2)*(error + error_d1);
+u_unsat = P.kp_v2*error + P.ki_v2*I;
+theta_c = sat(u_unsat, P.e_theta_max);
+if P.ki_v2~=0
+    I = I + P.Ts/P.ki_v2 * (theta_c-u_unsat);
+end
 end
 
 function delta_t = airspeed_with_throttle_hold(Va_c, Va, init, P)
-
+persistent I error_d1
+if init == 1
+    I = 0;
+    error_d1 = 0;
+end
+throttle_trim = P.u_trim(4);
+error = Va_c - Va;
+I = I + (P.Ts/2)*(error + error_d1);
+u_unsat = throttle_trim + P.kp_v*error + P.ki_v*I;
+delta_t = sat(u_unsat, 1, 0);
+if P.ki_v~=0
+    I = I + P.Ts/P.ki_v * (delta_t-u_unsat);
+end
 end
 
 

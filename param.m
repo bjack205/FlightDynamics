@@ -147,19 +147,19 @@ P.zeta_beta = 0.707;
 
 % Pitch attitude
 P.e_theta_max = 20*pi/180;
-P.zeta_theta = 1.1;
+P.zeta_theta = 0.707;
 
 % Altitude hold
 P.W_h = 15; % 15>x>5
-P.zeta_h = 0.707;
+P.zeta_h = 0.6;
 
 % Airspeed hold pitch
-P.W_v2 = 10;
+P.W_v2 = 20;
 P.zeta_v2 = 0.707;
 
 % Airspeed hold throttle
-P.wn_v = 1;
-P.zeta_v = 0.707;
+P.wn_v = 2;
+P.zeta_v = 0.9;
 
 % compute different transfer functions
 [T,P]= compute_tf_model(x_trim,u_trim,P);

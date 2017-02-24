@@ -49,7 +49,7 @@ Model {
       UnitExpr		      "inherit"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.190"
+    ComputedModelVersion    "1.191"
     NumModelReferences	    0
     NumTestPointedSignals   0
     NumProvidedFunctions    0
@@ -110,9 +110,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "Brian Jackson"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Feb 21 21:45:08 2017"
-  RTWModifiedTimeStamp	  409614277
-  ModelVersionFormat	  "1.%<AutoIncrement:190>"
+  LastModifiedDate	  "Thu Feb 23 10:05:55 2017"
+  RTWModifiedTimeStamp	  409737259
+  ModelVersionFormat	  "1.%<AutoIncrement:191>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -937,7 +937,7 @@ Model {
   System {
     Name		    "mavsim_trim"
     Location		    [151, 155, 1550, 997]
-    Open		    on
+    Open		    off
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
