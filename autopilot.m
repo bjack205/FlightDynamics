@@ -36,7 +36,7 @@ function y = autopilot(uu,P)
     NN = NN+3;
     t        = uu(1+NN);   % time
     
-    autopilot_version = 1;
+    autopilot_version = 2;
         % autopilot_version == 1 <- used for tuning
         % autopilot_version == 2 <- standard autopilot defined in book
         % autopilot_version == 3 <- Total Energy Control for longitudinal AP
@@ -65,7 +65,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P)
 
-    mode = 4;
+    mode = 5;
     switch mode
         case 1, % tune the roll loop
             phi_c = chi_c; % interpret chi_c to autopilot as course command
@@ -212,16 +212,15 @@ function [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,thet
 
     %----------------------------------------------------------
     % lateral autopilot
-    if t==0,
-        % assume no rudder, therefore set delta_r=0
-        delta_r = 0;%coordinated_turn_hold(beta, 1, P);
-        phi_c   = course_hold(chi_c, chi, r, 1, P);
-
+    if t==0
+        init_lat = true;
     else
-        phi_c   = course_hold(chi_c, chi, r, 0, P);
-        delta_r = 0;%coordinated_turn_hold(beta, 0, P);
+        init_lat = false;
     end
-    delta_a = roll_hold(phi_c, phi, p, P);     
+    % assume no rudder, therefore set delta_r=0
+    delta_r = 0;%coordinated_turn_hold(beta, 1, P);
+    phi_c   = course_hold(chi_c, chi, r, init_lat, P);
+    delta_a = roll_hold(phi_c, phi, p, init_lat, P);     
   
     
     %----------------------------------------------------------
@@ -229,33 +228,53 @@ function [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,thet
     
     % define persistent variable for state of altitude state machine
     persistent altitude_state;
-    persistent initialize_integrator;
+    persistent init;
+    persistent state_names
     % initialize persistent variable
     if t==0,
-        if h<=P.altitude_take_off_zone,     
-            altitude_state = 1;
-        elseif h<=h_c-P.altitude_hold_zone, 
-            altitude_state = 2;
-        elseif h>=h_c+P.altitude_hold_zone, 
-            altitude_state = 3;
-        else
-            altitude_state = 4;
-        end
-        initialize_integrator = 1;
+        init = true;
+        state_names = {'Take_off';'Climb Zone';'Descend Zone';'Altitude Hold Zone'};
+    end
+    
+    prev_state = altitude_state;
+    if h<=P.altitude_take_off_zone,     
+        altitude_state = 1;
+    elseif h<=h_c-P.altitude_hold_zone, 
+        altitude_state = 2;
+    elseif h>=h_c+P.altitude_hold_zone, 
+        altitude_state = 3;
+    else
+        altitude_state = 4;
+    end
+    if prev_state ~= altitude_state
+        init = true;
+        disp(state_names{altitude_state});
     end
     
     % implement state machine
     switch altitude_state,
         case 1,  % in take-off zone
+            theta_c = P.take_off_pitch;
+            delta_a = 0;
+            delta_t = 1;
             
         case 2,  % climb zone
+            theta_c = airspeed_with_pitch_hold(Va_c, Va, init, P);
+            delta_t = 0.7;
              
         case 3, % descend zone
+            theta_c = airspeed_with_pitch_hold(Va_c, Va, init, P);
+            delta_t = 0;
 
         case 4, % altitude hold zone
+            theta_c = altitude_hold(h_c, h, init, P);
+            delta_t = airspeed_with_throttle_hold(Va_c, Va, init, P);
+            
     end
+    init = false;
+    delta_e = pitch_hold(theta_c, theta, q, init, P);
+    delta_r = 0;
     
-    delta_e = pitch_hold(theta_c, theta, q, P);
     % artificially saturation delta_t
     delta_t = sat(delta_t,1,0);
  
@@ -409,7 +428,7 @@ end
 error = Va_c - Va;
 I = I + (P.Ts/2)*(error + error_d1);
 u_unsat = P.kp_v2*error + P.ki_v2*I;
-theta_c = sat(u_unsat, P.e_theta_max);
+theta_c = sat(u_unsat, 70*pi/180);
 if P.ki_v2~=0
     I = I + P.Ts/P.ki_v2 * (theta_c-u_unsat);
 end
