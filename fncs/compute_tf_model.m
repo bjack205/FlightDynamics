@@ -88,7 +88,7 @@ P.kp_h = 2*P.zeta_h*P.wn_h/(P.Kdc_theta*Va_trim);
 
 % Airspeed Hold Pitch
 P.wn_v2 = P.wn_theta/P.W_v2;
-P.ki_v2 = - P.wn_v2^2/(P.Kdc_theta*P.g);
+P.ki_v2 = -P.wn_v2^2/(P.Kdc_theta*P.g);
 P.kp_v2 = (a_V1 - 2*P.zeta_v2*P.wn_v2)/(P.Kdc_theta*P.g);
 
 % Airspeed Hold Throttle

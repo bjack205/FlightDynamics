@@ -114,7 +114,7 @@ P.x_trim = x_trim;
 % initial conditions
 P.pn0    = 0;  % initial North position
 P.pe0    = 0;  % initial East position
-P.pd0    = -100;  % initial Down position (negative altitude)
+P.pd0    = 0;  % initial Down position (negative altitude)
 P.u0     = x_trim(4);  % initial velocity along body x-axis
 P.v0     = x_trim(5);  % initial velocity along body y-axis
 P.w0     = x_trim(6);  % initial velocity along body z-axis
@@ -131,12 +131,13 @@ P.r0     = x_trim(12);  % initial body frame yaw rate
 %[A_lon, B_lon, A_lat, B_lat] = compute_ss_model('mavsim_trim',x_trim,u_trim);
 
 %% Compute Gains
-% Design Parameters
 
+%%%%%% Successive Loop Closure %%%%%%
 % Longitudinal Control
-P.altitude_take_off_zone = 20;
-P.altitude_hold_zone = 30;
-P.take_off_pitch = 45*pi/180;
+P.altitude_take_off_zone = 0;    
+P.altitude_hold_zone = 30;       
+P.take_off_pitch = 45*pi/180;    
+                    
 
 % Roll attitude
 P.e_phi_max = 60*pi/180;
@@ -152,24 +153,32 @@ P.zeta_beta = 0.707;
 
 % Pitch attitude
 P.e_theta_max = 45*pi/180;
-P.zeta_theta = 0.707;
+P.zeta_theta = 0.9;
 
 % Altitude hold
-P.W_h = 20; % 15>x>5
-P.zeta_h = 0.707;
+P.W_h = 30; % 15>x>5
+P.zeta_h = 1;
 
 % Airspeed hold pitch
-P.W_v2 = 100;
-P.zeta_v2 = 0.9;
+P.W_v2 = 6;
+P.zeta_v2 = 1;
 
 % Airspeed hold throttle
-P.wn_v = 2;
+P.wn_v = 1;
 P.zeta_v = 0.9;
 
 % compute different transfer functions
 [T,P]= compute_tf_model(x_trim,u_trim,P);
 
-P.kp_phi
-P.kd_phi
+%%%%%% Total Energy Control %%%%%%
+P.h_e = 20;  
+
+P.kp_E = 1;
+P.kd_E = 2;
+P.ki_E = 0.5;
+
+P.kp_B = 2.5;
+P.kd_B = 1.5;
+P.ki_B = 0.5;
 
 

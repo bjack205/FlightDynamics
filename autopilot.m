@@ -36,7 +36,7 @@ function y = autopilot(uu,P)
     NN = NN+3;
     t        = uu(1+NN);   % time
     
-    autopilot_version = 2;
+    autopilot_version = 3;
         % autopilot_version == 1 <- used for tuning
         % autopilot_version == 2 <- standard autopilot defined in book
         % autopilot_version == 3 <- Total Energy Control for longitudinal AP
@@ -230,11 +230,13 @@ function [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,thet
     persistent altitude_state;
     persistent init;
     persistent state_names
+    persistent delta_t
     % initialize persistent variable
     if t==0,
-        init = true;
+        init = true(6,1);
         h = -P.pd0;
         Va = P.Va0;
+        delta_t = P.u_trim(4);
         state_names = {'Take_off';'Climb Zone';'Descend Zone';'Altitude Hold Zone'};
     end
     
@@ -249,33 +251,42 @@ function [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,thet
         altitude_state = 4;
     end
     if prev_state ~= altitude_state
-        init = true;
-        disp(state_names{altitude_state})
+        %init = true;
+        init(2) = true;
+        fprintf(state_names{altitude_state})
     end
-    
+
     % implement state machine
-    switch altitude_state,
-        case 1,  % in take-off zone
+    switch altitude_state
+        case 1  % in take-off zone
             theta_c = P.take_off_pitch;
             delta_a = 0;
             delta_t = 1;
             
-        case 2,  % climb zone
-            theta_c = airspeed_with_pitch_hold(Va_c, Va, init, P);
-            delta_t = 0.7;
+        case 2  % climb zone
+            theta_c = airspeed_with_pitch_hold(Va_c, Va, init(2), P);
+            delta_t_c = 0.7;
+            delta_t = throttle_control(delta_t_c, delta_t, init(6), P);
+            init(6) = false;
+            init(2) = false;
              
-        case 3, % descend zone
-            theta_c = airspeed_with_pitch_hold(Va_c, Va, init, P);
-            delta_t = 0;
+        case 3 % descend zone
+            theta_c = airspeed_with_pitch_hold(Va_c, Va, init(2), P);
+            delta_t_c = 0;
+            delta_t = throttle_control(delta_t_c, delta_t, init(6), P);
+            init(6) = false;
+            init(2) = false;
 
-        case 4, % altitude hold zone
-            theta_c = altitude_hold(h_c, h, init, P);
-            delta_t = airspeed_with_throttle_hold(Va_c, Va, init, P);
+        case 4 % altitude hold zone
+            theta_c = altitude_hold(h_c, h, init(3), P);
+            delta_t = airspeed_with_throttle_hold(Va_c, Va, init(4), P);
+            init(3:4) = false;
             
     end
-    init = false;
-    delta_e = pitch_hold(theta_c, theta, q, init, P);
+    
+    delta_e = pitch_hold(theta_c, theta, q, init(5), P);
     delta_r = 0;
+    init(5) = false;
     
     % artificially saturation delta_t
     delta_t = sat(delta_t,1,0);
@@ -315,25 +326,32 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
 
     %----------------------------------------------------------
     % lateral autopilot
-    if t==0,
-        % assume no rudder, therefore set delta_r=0
-        delta_r = 0;%coordinated_turn_hold(beta, 1, P);
-        phi_c   = course_hold(chi_c, chi, r, 1, P);
-
+    % lateral autopilot
+    if t==0
+        init = true;
+        Va = P.Va0;
     else
-        phi_c   = course_hold(chi_c, chi, r, 0, P);
-        delta_r = 0;%coordinated_turn_hold(beta, 0, P);
+        init = false;
     end
-    delta_a = roll_hold(phi_c, phi, p, P);     
+    % assume no rudder, therefore set delta_r=0
+    delta_r = 0;%coordinated_turn_hold(beta, 1, P);
+    phi_c   = course_hold(chi_c, chi, r, init, P);
+    delta_a = roll_hold(phi_c, phi, p, init, P);      
   
     
     %----------------------------------------------------------
     % longitudinal autopilot based on total energy control
     
+    Knom = 1/2*P.mass*P.Va0^2;
+    Kerr = 1/2*P.mass*(Va_c^2 - Va^2);
+    Uerr = P.mass*P.g*(h_c - h);
     
-    delta_e = 0;
-    delta_t = 0;
- 
+    Etot = (Kerr + Uerr)/Knom;
+    Ebal = (Kerr - Uerr)/Knom;
+    
+    delta_t = TotalEnergy(Etot, init, P);
+    theta_c = -EnergyBalance(Ebal, init, P);
+    delta_e = pitch_hold(theta_c, theta, q, init, P);
     
     %----------------------------------------------------------
     % create outputs
@@ -377,6 +395,7 @@ error = phi_c - phi;
 D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
 u_unsat = P.kp_phi*error - P.kd_phi*p;
 delta_a = sat(u_unsat,P.delta_a_max);
+error_d1 = error;
 end
 
 function phi_c = course_hold(chi_c, chi, r, init, P)
@@ -392,6 +411,7 @@ phi_c = sat(u_unsat,P.e_phi_max);
 if P.ki_chi~=0
     I = I + P.Ts/P.ki_chi * (phi_c-u_unsat);
 end
+error_d1 = error;
 end
 
 function delta_e = pitch_hold(theta_c, theta, q, init, P)
@@ -404,6 +424,7 @@ error = theta_c - theta;
 D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
 u_unsat = P.kp_theta*error - P.kd_theta*q;
 delta_e = sat(u_unsat,P.delta_e_max);
+error_d1 = error;
 end
 
 function theta_c = altitude_hold(h_c, h, init, P)
@@ -419,6 +440,7 @@ theta_c = sat(u_unsat,P.e_theta_max);
 if P.ki_h~=0
     I = I + P.Ts/P.ki_h * (theta_c-u_unsat);
 end
+error_d1 = error;
 end
 
 function theta_c = airspeed_with_pitch_hold(Va_c, Va, init, P)
@@ -434,6 +456,7 @@ theta_c = sat(u_unsat, 80*pi/180);
 if P.ki_v2~=0
     I = I + P.Ts/P.ki_v2 * (theta_c-u_unsat);
 end
+error_d1 = error;
 end
 
 function delta_t = airspeed_with_throttle_hold(Va_c, Va, init, P)
@@ -450,8 +473,65 @@ delta_t = sat(u_unsat, 1, 0);
 if P.ki_v~=0
     I = I + P.Ts/P.ki_v * (delta_t-u_unsat);
 end
+error_d1 = error;
 end
 
+function delta_t = throttle_control(delta_t_c, delta_t, init, P)
+persistent I D error_d1
+kp = 0.005;
+kd = 0.000;
+ki = 0.00;
+if init == 1
+    I = 0;
+    D = 0;
+    error_d1 = 0;
+end
+error = delta_t_c - delta_t;
+I = I + (P.Ts/2)*(error + error_d1);
+D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
+u_unsat = delta_t + kp*error + ki*I - kd*D;
+delta_t = sat(u_unsat, 1, 0);
+if ki ~= 0
+    I = I + P.Ts/ki * (delta_t-u_unsat);
+end
+error_d1 = error;
+end
+
+function delta_t = TotalEnergy(Etot, init, P)
+persistent I D error_d1
+if init == 1
+    I = 0;
+    D = 0;
+    error_d1 = 0;
+end
+error = Etot;
+I = I + (P.Ts/2)*(Etot + error_d1);
+D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
+u_unsat = P.kp_E*error + P.kd_E*D + P.ki_E*I;
+delta_t = sat(u_unsat,1,0);
+if P.ki_E ~= 0
+    I = I + P.Ts/P.ki_E * (delta_t-u_unsat);
+end
+error_d1 = error;
+end
+
+function theta_c = EnergyBalance(Ebal, init, P)
+persistent I D error_d1
+if init == 1
+    I = 0;
+    D = 0;
+    error_d1 = 0;
+end
+error = Ebal;
+I = I + (P.Ts/2)*(Ebal + error_d1);
+D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
+u_unsat = P.kp_B*error + P.kd_B*D + P.ki_B*I;
+theta_c = sat(u_unsat,45*pi/180);
+if P.ki_B ~= 0
+    I = I + P.Ts/P.ki_B * (theta_c-u_unsat);
+end
+error_d1 = error;
+end
 
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
