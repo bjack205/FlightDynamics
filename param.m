@@ -101,6 +101,7 @@ R     = Inf ;         % desired radius (m) - use (+) for right handed orbit,
 
 % autopilot sample rate
 P.Ts = 0.01;
+P.Ts_estimator = P.Ts/10;
 P.lambda = 100;
 P.Tau = 0.05;
 
@@ -145,7 +146,7 @@ P.r0     = x_trim(12);  % initial body frame yaw rate
 % linearize the equations of motion around trim conditions
 %[A_lon, B_lon, A_lat, B_lat] = compute_ss_model('mavsim_trim',x_trim,u_trim);
 
-%% Compute Gains
+%% Tune Gains
 
 %%%%%% Successive Loop Closure %%%%%%
 % Longitudinal Control
@@ -153,7 +154,6 @@ P.altitude_take_off_zone = 0;
 P.altitude_hold_zone = 30;       
 P.take_off_pitch = 45*pi/180;    
                     
-
 % Roll attitude
 P.e_phi_max = 60*pi/180;
 P.zeta_phi = 1.2;
@@ -195,5 +195,8 @@ P.ki_E = 0.5;
 P.kp_B = 2.5;
 P.kd_B = 1.5;
 P.ki_B = 0.5;
+
+%%%%%% Estimator Gains
+P.Q_a = 
 
 
