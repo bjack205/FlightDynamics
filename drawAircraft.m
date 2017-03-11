@@ -1,20 +1,25 @@
 
-function drawAircraft(uu,id)
+function drawAircraft(uu)
+
+N = (length(uu)-1)/12;
 
 % process inputs to function
-pn       = uu(1);       % inertial North position
-pe       = uu(2);       % inertial East position
-pd       = uu(3);
-u        = uu(4);
-v        = uu(5);
-w        = uu(6);
-phi      = uu(7);       % roll angle
-theta    = uu(8);       % pitch angle
-psi      = uu(9);       % yaw angle
-p        = uu(10);       % roll rate
-q        = uu(11);       % pitch rate
-r        = uu(12);       % yaw rate
-t        = uu(13);       % time
+for i = 1:N
+    k = 12*(i-1);
+    pn(i)       = uu(1+k);       % inertial North position
+    pe(i)       = uu(2+k);       % inertial East position
+    pd(i)       = uu(3+k);
+    u(i)        = uu(4+k);
+    v(i)        = uu(5+k);
+    w(i)        = uu(6+k);
+    phi(i)      = uu(7+k);       % roll angle
+    theta(i)    = uu(8+k);       % pitch angle
+    psi(i)      = uu(9+k);       % yaw angle
+    p(i)        = uu(10+k);       % roll rate
+    q(i)        = uu(11+k);       % pitch rate
+    r(i)        = uu(12+k);       % yaw rate
+end
+t               = uu(end);       % time
 
 
 
@@ -36,9 +41,7 @@ end
 % first time function is called, initialize plot and persistent vars
 if t==0
     figure(1)
-    if isempty(init)
-        init = true;
-    end
+    init = true;
     
     if init
         clf
@@ -61,18 +64,21 @@ if t==0
     
     scaling = 10;
     window = 100;
-    [Vertices,Faces,facecolors] = defineVehicleBody(scaling);
-    vehicle_handle{id} = drawVehicleBody(Vertices,Faces,facecolors,...
-        pn,pe,pd,phi,theta,psi,...
-        []);
-    
-    FollowPlane(vehicle_handle{id},pn,pe,pd,window)
+    for id = 1:N
+        [Vertices,Faces,facecolors] = defineVehicleBody(scaling);
+        vehicle_handle{id} = drawVehicleBody(Vertices,Faces,facecolors,...
+            pn(id),pe(id),pd(id),phi(id),theta(id),psi(id),...
+            []);
+    end
+    FollowPlane(vehicle_handle{1},pn(1),pe(1),pd(1),window)
     
 else
-    FollowPlane(vehicle_handle{1},pn,pe,pd,window)
-    drawVehicleBody(Vertices,Faces,facecolors,...
-        pn,pe,pd,phi,theta,psi,...
-        vehicle_handle{id});
+    FollowPlane(vehicle_handle{1},pn(1),pe(1),pd(1),window)
+    for id = 1:N
+        drawVehicleBody(Vertices,Faces,facecolors,...
+            pn(id),pe(id),pd(id),phi(id),theta(id),psi(id),...
+            vehicle_handle{id});
+    end
     
 end
 
@@ -92,8 +98,9 @@ if multiplane
     else
         plane_label.Position = xyz;
     end
-    drawnow
+    
 end
+drawnow
 end
 
 
@@ -123,7 +130,6 @@ if isempty(handle)
     
 else
     set(handle,'Vertices',V','Faces',F);
-    drawnow
 end
 
 end
