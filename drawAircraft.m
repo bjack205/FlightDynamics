@@ -1,5 +1,5 @@
 
-function drawAircraft(uu)
+function drawAircraft(uu,id)
 
 % process inputs to function
 pn       = uu(1);       % inertial North position
@@ -16,41 +16,83 @@ q        = uu(11);       % pitch rate
 r        = uu(12);       % yaw rate
 t        = uu(13);       % time
 
+
+
 % define persistent variables
 persistent vehicle_handle;
 persistent Vertices
 persistent Faces
 persistent facecolors
+persistent window scaling
+persistent init
+
+if nargin == 1
+    multiplane = false;
+    id = 1;
+else
+    multiplane = true;
+end
 
 % first time function is called, initialize plot and persistent vars
-if t==0,
-    figure(1), clf
-    [Vertices,Faces,facecolors] = defineVehicleBody;
-    vehicle_handle = drawVehicleBody(Vertices,Faces,facecolors,...
+if t==0
+    figure(1)
+    if isempty(init)
+        init = true;
+    end
+    
+    if init
+        clf
+        ground = 1e9;
+        alt = 0;
+        
+        patch([ground, ground,-ground,-ground],[ground,-ground,-ground,ground],-[alt alt alt alt],[0 0.5 0])
+        title('Vehicle')
+        xlabel('East')
+        ylabel('North')
+        zlabel('-Down')
+        view(32,47)  % set the view angle for figure
+        axis equal
+        light('Position',[-0.4 0.2 0.9],'Style','infinite');
+        lighting gouraud
+        grid on
+        hold on
+        init = false;
+    end
+    
+    scaling = 10;
+    window = 100;
+    [Vertices,Faces,facecolors] = defineVehicleBody(scaling);
+    vehicle_handle{id} = drawVehicleBody(Vertices,Faces,facecolors,...
         pn,pe,pd,phi,theta,psi,...
         []);
-    ground = 1e9;
-    alt = 100;
-    patch([ground, ground,-ground,-ground],[ground,-ground,-ground,ground],-[alt alt alt alt],[0 0.5 0])
-    title('Vehicle')
-    xlabel('East')
-    ylabel('North')
-    zlabel('-Down')
-    view(32,47)  % set the view angle for figure
-    axis equal
-    axis([-10,10,-10,10,-10,10]);
-    l = light('Position',[-0.4 0.2 0.9],'Style','infinite');
-    lighting gouraud
-    grid on
-    hold on
     
-    % at every other time step, redraw base and rod
+    FollowPlane(vehicle_handle{id},pn,pe,pd,window)
+    
 else
-    FollowPlane(vehicle_handle,pn,pe,pd)
+    FollowPlane(vehicle_handle{1},pn,pe,pd,window)
     drawVehicleBody(Vertices,Faces,facecolors,...
         pn,pe,pd,phi,theta,psi,...
-        vehicle_handle);
+        vehicle_handle{id});
     
+end
+
+if multiplane
+    Rbv = quat2rmat(euler2quat(phi,theta,psi));
+    R = [...
+        0, 1, 0;...
+        1, 0, 0;...
+        0, 0, -1;...
+        ];
+    pos = [pn;pe;pd];
+    offset = Rbv'*[1;0;0]*scaling;
+    pos = pos-offset;
+    xyz = R*pos;
+    if t == 0
+        plane_label{id} = text(xyz(1),xyz(2),xyz(3),['Plane ' num2str(id)]);
+    else
+        plane_label.Position = xyz;
+    end
+    drawnow
 end
 end
 
@@ -74,7 +116,7 @@ R = [...
     ];
 V = R*V;
 
-if isempty(handle),
+if isempty(handle)
     handle = patch('Vertices', V', 'Faces', F,...
         'FaceVertexCData',patchcolors,...
         'FaceColor','flat');
@@ -83,12 +125,18 @@ else
     set(handle,'Vertices',V','Faces',F);
     drawnow
 end
+
 end
 
-function FollowPlane(vehicle_handle,pn,pe,pd)
-xlim(vehicle_handle.Parent,pe+[-10 10])
-ylim(vehicle_handle.Parent,pn+[-10 10])
-zlim(vehicle_handle.Parent,-pd+[-10 10])
+function FollowPlane(vehicle_handle,pn,pe,pd,window)
+if pd > 0
+    bottom = pd+window;
+else
+    bottom = 0;
+end
+xlim(vehicle_handle.Parent,pe+[-window window])
+ylim(vehicle_handle.Parent,pn+[-window window])
+zlim(vehicle_handle.Parent,[-bottom -pd+window])
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -133,7 +181,7 @@ end
 %=======================================================================
 % defineVehicleBody
 %=======================================================================
-function [V,F,facecolors] = defineVehicleBody
+function [V,F,facecolors] = defineVehicleBody(scaling)
 
 % Parameters
 fuse_l1 = 1;
@@ -203,4 +251,5 @@ facecolors = [...
     mytan;...    % wing
     mytan;...    % wing
     ];
+V = V*scaling;
 end
