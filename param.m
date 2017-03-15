@@ -79,18 +79,19 @@ P.delta_r_max = 45*pi/180;
 P.delta_e_max = 45*pi/180;
 
 % Sensor data
-P.sigma_gyro_x = 0;
-P.sigma_gyro_y = 0;
-P.sigma_gyro_z = 0;
-P.sigma_accel_x = 0;
-P.sigma_accel_y = 0;
-P.sigma_accel_z = 0;
-P.sigma_p_abs = 0;
-P.sigma_p_diff = 0;
-P.beta_p_abs = 0;
-P.beta_p_diff = 0;
+P.sigma_gyro_x = 0.13;
+P.sigma_gyro_y = 0.13;
+P.sigma_gyro_z = 0.13;
+P.sigma_accel_x = 0.0025*P.g;
+P.sigma_accel_y = 0.0025*P.g;
+P.sigma_accel_z = 0.0025*P.g;
+P.sigma_p_abs = 0.01e3;
+P.sigma_p_diff = 0.002e3;
+P.beta_p_abs = 0.125e3;
+P.beta_p_diff = 0.020e3;
 P.sigma_Vg = 0;
 P.sigma_chi = 0;
+P.sigma_gps = [0.21 0.21 0.40];
 P.Ts_gps = 1;
 
 %% Compute trim conditions using 'mavsim_trim.mdl'
