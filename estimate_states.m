@@ -43,6 +43,14 @@ y_gps_Vg      = uu(12);
 y_gps_course  = uu(13);
 t             = uu(14);
 
+% Break into sections by rate
+uu_a = uu(1:8);
+uu_gps = uu(9:13);
+
+% Pseudo measurements
+y_wind_n = 0;
+y_wind_e = 0;
+
 % not estimating these states
 alphahat = 0;
 betahat  = 0;
@@ -50,13 +58,14 @@ bxhat    = 0;
 byhat    = 0;
 bzhat    = 0;
 
-persistent xhat_d1 uu_d1 P_a P_gps
+persistent xhat_d1 uu_a_d1 uu_gps_d1 P_a P_gps
 
 if t == 0
+    
     pnhat = P.pn0; 
     pehat = P.pe0; 
     hhat = -P.pd0;
-    Vahat = P.Vahat;
+    Vahat = P.Va0;
     phihat = P.phi0; 
     thetahat = P.theta0; 
     psihat = P.psi0;
@@ -65,33 +74,42 @@ if t == 0
     rhat =P.r0;
     Vahat = P.Va0;
     psihat = P.psi0;
-else
-    phat = y_gyro_x;
-    qhat = y_gyro_y;
-    rhat = y_gryo_z;
-    hhat = y_static_pres/(P.rho*P.g);
-    Vahat = sqrt(2/P.rho*y_diff_pres);
-    pnhat = y_gps_n;
-    pehat = y_gps_e;
-    chihat = y_gps_course;
-    Vghat = y_gps_Vg;
     
-    pn = xhat_d1(1);
-    pe = xhat_d1(2);
-    h  = xhat_d1(3);
-    Va = xhat_d1(4);
-    phi = xhat_d1(7);
-    theta = xhat_d1(8);
-    chi = xhat_d1(9);
-    p = xhat_d1(10);
-    q = xhat_d1(11);
-    r = xhat_d1(12);
-    Vg = xhat_d1(13);
-    wn = xhat_d1(14);
-    we = xhat_d1(15);
-    psi = xhat_d1(16);
+    P_a = diag([0.01; 0.01]);
+    P_gps = diag([5 5 10 0.01 10 10 0.01]);
+    uu_a_d1 = [-100, -100, -100];
+    uu_gps_d1 = ones(1,7)*-100;
+    
+else
+    
+    pnhat = xhat_d1(1);
+    pehat = xhat_d1(2);
+    hhat  = xhat_d1(3);
+    Vahat = xhat_d1(4);
+    phihat = xhat_d1(7);
+    thetahat = xhat_d1(8);
+    chihat = xhat_d1(9);
+    phat = xhat_d1(10);
+    qhat = xhat_d1(11);
+    rhat = xhat_d1(12);
+    Vghat = xhat_d1(13);
+    wnhat = xhat_d1(14);
+    wehat = xhat_d1(15);
+    psihat = xhat_d1(16);
     
 end
+
+% Get values from sensors
+p = y_gyro_x;
+q = y_gyro_y;
+r = y_gyro_z;
+h = y_static_pres/(P.rho*P.g);
+Va = sqrt(2/P.rho*y_diff_pres);
+pn = y_gps_n;
+pe = y_gps_e;
+chi = y_gps_course;
+Vg = y_gps_Vg;
+
 N = P.Ts/P.Ts_estimator;
 
 %% Attitude Estimation
@@ -100,33 +118,30 @@ for i = 1:N
     f_a = [phat+qhat*sin(phihat)*tan(thetahat) + rhat*cos(phihat)*tan(thetahat);...
            qhat*cos(phihat)-rhat*sin(phihat)];
     
-    
     xhat_a = xhat_a + P.Ts_estimator*f_a;
     phihat = xhat_a(1);
     thetahat = xhat_a(2);
     
-    df_a = [qhat*cos(phihat)*tan(thetahat)-rhat*sin(phihat)*tan(thetahat)      (qhat*sin(phihat)-r*cos(phi))/cos(thetahat)^2;...
+    df_a = [qhat*cos(phihat)*tan(thetahat)-rhat*sin(phihat)*tan(thetahat)      (qhat*sin(phihat)-r*cos(phihat))/cos(thetahat)^2;...
             -qhat*sin(phihat)-rhat*cos(phihat)                                                      0                        ];
     A = df_a;
     P_a = P_a + P.Ts_estimator*(A*P_a + P_a*A' + P.Q_a);
 end
 
 % Measurement update
-if any(abs(uu_d1-uu))
-    h_a = [qhat*Vahat*sin(thetahat) + P.g*sin(thetahat);...
-           rhat*Vahat*cos(thetahat) - phat*Vahat*sin(thetahat)-P.g*cos(thetahat)*sin(phihat);...
-           -qhat*Vahat*cos(thetahat) - P.g*cos(thetahat)*cos(phihat)];
-    dh_a = [0                               qhat*Vahat*cos(thetahat)+P.g*Vahat*cos(thetahat)+P.g*cos(thetahat);...
-            -P.g*cos(phihat)*cos(thetahat) -rhat*Vahat*sin(thetahat)-phat*Vahat*cos(thetahat)+P.g*sin(phihat)*sin(thetahat);...
-             P.g*sin(phihat)*cos(thetahat) (qhat*Vahat+P.g*cos(phihat))*sin(thetahat)];
+if any(abs(uu_a - uu_a_d1))
+    h_a = [q*Va*sin(thetahat) + P.g*sin(thetahat);...
+           r*Va*cos(thetahat) - p*Va*sin(thetahat)-P.g*cos(thetahat)*sin(phihat);...
+           -q*Va*cos(thetahat) - P.g*cos(thetahat)*cos(phihat)];
+    dh_a = [0                               q*Va*cos(thetahat)+P.g*Va*cos(thetahat)+P.g*cos(thetahat);...
+            -P.g*cos(phihat)*cos(thetahat) -r*Va*sin(thetahat)-p*Va*cos(thetahat)+P.g*sin(phihat)*sin(thetahat);...
+             P.g*sin(phihat)*cos(thetahat) (q*Va+P.g*cos(phihat))*sin(thetahat)];
     y = [y_accel_x; y_accel_y; y_accel_z];
     
-    Ci = dh_a;
-    Li = P*Ci'*inv(Ri+Ci*P*Ci');
-    P = (I-Li*Ci)*P;
-    xhat_a = xhat_a + Li*(y - h_a);
-    phihat = xhat_a(1);
-    thetahat = xhat_a(2);
+    Ci_a = dh_a;
+    Li_a = P_a*Ci_a'*inv(P.Ri+Ci_a*P*Ci_a');
+    P_a = (I-Li_a*Ci_a)*P_a;
+    xhat_a = xhat_a + Li_a*(y - h_a);
 end
 
 %% GPS Smoothing
@@ -167,9 +182,46 @@ for i = 1:N
     A = df_gps;
     P_gps = P_gps + P.Ts_estimator*(A_*P_gps + P_gps*A' + P.Q_gps);
 end
-    
 
-uu_d1 = uu;
+if any(abs(uu_gps - uu_gps_d1))
+    h_gps = [pnhat; pehat; Vghat; chihat;...
+             Va*cos(psihat) + wn - Vghat*cos(chi);...
+             Va*sin(psihat) + we - Vghat*sin(chi)];
+    dh_gps = [1 0 0 0 0 0 0;...
+              0 1 0 0 0 0 0;...
+              0 0 1 0 0 0 0;...
+              0 0 0 1 0 0 0;...
+              0 0 -cos(chi) Vg*sin(chi) 1 0 -Va*sin(psi);...
+              0 0 -sin(chi) Vg*cos(chi) 0 1  Va*cos(psi)];
+     
+    Ci_gps = dh_gps;
+    Li_gps = P_gps*Ci_gps'*inv(P.Ri_gps + Ci_gps*P_gps*Ci_gps');
+    P_gps = (eye(3)-Li_gps*Ci_gps)*P_gps;
+    
+    y_gps = [y_gps_n; y_gps_e; y_gps_Vg; y_gps_chi; y_wind_n; y_wind_e];
+    xhat_gps = xhat_gps + Li_gps*(y_gps - h_gps);
+    
+    pnhat  = xhat_gps(1);
+    pehat  = xhat_gps(2);
+    Vghat  = xhat_gps(3);
+    chihat = xhat_gps(4);
+    wnhat  = xhat_gps(5);
+    wehat  = xhat_gps(6);
+    psihat = xhat_gps(7);
+    
+end
+
+% Low pass filter these?
+hhat = h;
+phihat = xhat_a(1);
+thetahat = xhat_a(2);
+phat = p;
+qhat = q;
+rhat = r;
+Vahat = Va;
+
+uu_a_d1 = uu_a;
+uu_gps_d1 = uu_gps;
 xhat = [...
     pnhat;...
     pehat;...
