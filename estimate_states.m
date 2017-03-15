@@ -72,11 +72,15 @@ if t == 0
     phat = P.p0; 
     qhat = P.q0; 
     rhat =P.r0;
-    Vahat = P.Va0;
+    Vghat = P.Va0;
+    wnhat = P.wind_n;
+    wehat = P.wind_e;
     psihat = P.psi0;
+    chihat = P.psi0;
     
     P_a = diag([0.01; 0.01]);
-    P_gps = diag([5 5 10 0.01 10 10 0.01]);
+    P_gps = diag([5 5 10 0.01 10 10 0.01].^2);
+    
     uu_a_d1 = [-100, -100, -100];
     uu_gps_d1 = ones(1,7)*-100;
     
@@ -110,6 +114,21 @@ pe = y_gps_e;
 chi = y_gps_course;
 Vg = y_gps_Vg;
 
+% Gains
+Q_a = diag([0.1 0.1]);
+Q_gps = diag([0.1 0.1 0.1 0.01 0.1 0.1 0.01]);
+
+% Noise Matrices
+sigma_Vg = P.sigma_v;
+Vn = Va*cos(psihat)+wnhat;
+Ve = Va*sin(psihat)+wehat;
+Vg = sqrt(Vn^2+Ve^2);
+sigma_chi = P.sigma_v / Vg;
+
+Ri_a = diag([P.sigma_accel_x P.sigma_accel_y P.sigma_accel_z]);
+Ri_gps = diag([P.sigma_gps(1) P.sigma_gps(2) sigma_Vg sigma_chi 1e-6 1e-6]);
+
+
 N = P.Ts/P.Ts_estimator;
 
 %% Attitude Estimation
@@ -139,8 +158,8 @@ if any(abs(uu_a - uu_a_d1))
     y = [y_accel_x; y_accel_y; y_accel_z];
     
     Ci_a = dh_a;
-    Li_a = P_a*Ci_a'*inv(P.Ri+Ci_a*P*Ci_a');
-    P_a = (I-Li_a*Ci_a)*P_a;
+    Li_a = P_a*Ci_a'*inv(Ri_a+Ci_a*P_a*Ci_a');
+    P_a = (eye(2)-Li_a*Ci_a)*P_a;
     xhat_a = xhat_a + Li_a*(y - h_a);
 end
 
@@ -154,7 +173,7 @@ for i = 1:N
     f_gps = [Vghat*cos(chihat);...
              Vghat*sin(chihat);...
              ((Vahat*cos(psihat)+wnhat)*(-Vahat*psidot*sin(psihat)) + (Vahat*sin(psihat)+wehat)*(Vahat*psihat*cos(psihat)))/Vghat;...
-             P.g/Vghat*tan(psi)*cos(chihat-psihat);...
+             P.g/Vghat*tan(psihat)*cos(chihat-psihat);...
              0;...
              0;...
              qhat*sin(psihat)/cos(thetahat) + rhat*cos(psihat)/cos(thetahat)];
@@ -178,27 +197,29 @@ for i = 1:N
               0 0 -Vgdot/Vghat  0                 -psidot*Vahat*sin(psihat) psidot*Vahat*cos(psihat) dVgdot_dpsi;
               0 0 dchidot_dVg       dchidot_dchi       0 0 dchidot_dpsi;...
               0 0 0 0 0 0 0;...
+              0 0 0 0 0 0 0;...
               0 0 0 0 0 0 0];
     A = df_gps;
-    P_gps = P_gps + P.Ts_estimator*(A_*P_gps + P_gps*A' + P.Q_gps);
+    P_gps = P_gps + P.Ts_estimator*(A*P_gps + P_gps*A' + Q_gps);
 end
 
+% Measurement update
 if any(abs(uu_gps - uu_gps_d1))
     h_gps = [pnhat; pehat; Vghat; chihat;...
-             Va*cos(psihat) + wn - Vghat*cos(chi);...
-             Va*sin(psihat) + we - Vghat*sin(chi)];
+             Va*cos(psihat) + wnhat - Vghat*cos(chihat);...
+             Va*sin(psihat) + wehat - Vghat*sin(chihat)];
     dh_gps = [1 0 0 0 0 0 0;...
               0 1 0 0 0 0 0;...
               0 0 1 0 0 0 0;...
               0 0 0 1 0 0 0;...
-              0 0 -cos(chi) Vg*sin(chi) 1 0 -Va*sin(psi);...
-              0 0 -sin(chi) Vg*cos(chi) 0 1  Va*cos(psi)];
+              0 0 -cos(chihat) Vg*sin(chi) 1 0 -Va*sin(psihat);...
+              0 0 -sin(chihat) Vg*cos(chi) 0 1  Va*cos(psihat)];
      
     Ci_gps = dh_gps;
-    Li_gps = P_gps*Ci_gps'*inv(P.Ri_gps + Ci_gps*P_gps*Ci_gps');
-    P_gps = (eye(3)-Li_gps*Ci_gps)*P_gps;
+    Li_gps = P_gps*Ci_gps'*inv(Ri_gps + Ci_gps*P_gps*Ci_gps');
+    P_gps = (eye(7)-Li_gps*Ci_gps)*P_gps;
     
-    y_gps = [y_gps_n; y_gps_e; y_gps_Vg; y_gps_chi; y_wind_n; y_wind_e];
+    y_gps = [y_gps_n; y_gps_e; y_gps_Vg; y_gps_course; y_wind_n; y_wind_e];
     xhat_gps = xhat_gps + Li_gps*(y_gps - h_gps);
     
     pnhat  = xhat_gps(1);
