@@ -51,13 +51,12 @@ function y = gps(uu, P)
     y_gps_h = -pd + vd(2); 
     
     % construct groundspeed and course measurements
-    sigma_v = 0.05;
-    sigma_Vg = sigma_v;
+    sigma_Vg = P.sigma_v;
     
     Vn = Va*cos(psi)+wn;
     Ve = Va*sin(psi)+we;
     Vg = sqrt(Vn^2+Ve^2);
-    sigma_chi = sigma_v / Vg;
+    sigma_chi = P.sigma_v / Vg;
     y_gps_Vg     = sqrt((Va*cos(psi)+wn^2)^2 + (Va*sin(psi)+we)^2) + randn*sigma_Vg;
     y_gps_course = atan2(Va*sin(psi)+we, Va*cos(psi)+wn) + randn*sigma_chi;
 

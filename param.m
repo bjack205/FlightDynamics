@@ -92,6 +92,7 @@ P.beta_p_diff = 0.020e3;
 P.sigma_Vg = 0;
 P.sigma_chi = 0;
 P.sigma_gps = [0.21 0.21 0.40];
+P.sigma_v = 0.05;
 P.Ts_gps = 1;
 
 %% Compute trim conditions using 'mavsim_trim.mdl'
@@ -198,6 +199,5 @@ P.kd_B = 1.5;
 P.ki_B = 0.5;
 
 %%%%%% Estimator Gains
-P.Q_a = 
 
 
