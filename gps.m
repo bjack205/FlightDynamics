@@ -37,11 +37,11 @@ function y = gps(uu, P)
         vd = zeros(2,1);
     end
     k_gps = 1/1100;
-    sigma_gps = [0.21 0.21 0.40];
+    
     Ts = 1;
-    vn(2) = exp(-k_gps*Ts)*vn(1) + sigma_gps(1)*randn;
-    ve(2) = exp(-k_gps*Ts)*ve(1) + sigma_gps(2)*randn;
-    vd(2) = exp(-k_gps*Ts)*vd(1) + sigma_gps(3)*randn;
+    vn(2) = exp(-k_gps*Ts)*vn(1) + P.sigma_gps(1)*randn;
+    ve(2) = exp(-k_gps*Ts)*ve(1) + P.sigma_gps(2)*randn;
+    vd(2) = exp(-k_gps*Ts)*vd(1) + P.sigma_gps(3)*randn;
     vn(1) = vn(2);
     ve(1) = ve(2);
     vd(1) = vd(2);
