@@ -25,7 +25,7 @@
 %            5/18/2010 - RB
 %
 
-function xhat_out = estimate_states(uu, P)
+function xhat = estimate_states(uu, P)
 
 % rename inputs
 y_gyro_x      = uu(1);
@@ -78,12 +78,13 @@ if t == 0
     psihat = P.psi0;
     chihat = P.psi0;
     
-    P_a = diag([0.01; 0.01]);
+    P_a = diag([5*pi/180; 5*pi/180]);
     P_gps = diag([5 5 10 0.01 10 10 0.01].^2);
     
     uu_a_d1 = [-100, -100, -100];
     uu_gps_d1 = ones(1,7)*-100;
     
+    xhat_d1 = zeros(19,1);
 else
     
     pnhat = xhat_d1(1);
@@ -115,7 +116,7 @@ chi = y_gps_course;
 Vg = y_gps_Vg;
 
 % Gains
-Q_a = diag([0.1 0.1]);
+Q_a = diag([1e-8 1e-8]);
 Q_gps = diag([0.1 0.1 0.1 0.01 0.1 0.1 0.01]);
 
 % Noise Matrices
@@ -125,8 +126,8 @@ Ve = Va*sin(psihat)+wehat;
 Vg = sqrt(Vn^2+Ve^2);
 sigma_chi = P.sigma_v / Vg;
 
-Ri_a = diag([P.sigma_accel_x P.sigma_accel_y P.sigma_accel_z]);
-Ri_gps = diag([P.sigma_gps(1) P.sigma_gps(2) sigma_Vg sigma_chi 1e-6 1e-6]);
+Ri_a = diag([P.sigma_accel_x P.sigma_accel_y P.sigma_accel_z].^2);
+Ri_gps = diag([P.sigma_gps(1) P.sigma_gps(2) sigma_Vg sigma_chi 1e-6 1e-6].^2);
 
 
 N = P.Ts/P.Ts_estimator;
@@ -141,10 +142,10 @@ for i = 1:N
     phihat = xhat_a(1);
     thetahat = xhat_a(2);
     
-    df_a = [qhat*cos(phihat)*tan(thetahat)-rhat*sin(phihat)*tan(thetahat)      (qhat*sin(phihat)-r*cos(phihat))/cos(thetahat)^2;...
+    df_a = [qhat*cos(phihat)*tan(thetahat)-rhat*sin(phihat)*tan(thetahat)      (qhat*sin(phihat)-rhat*cos(phihat))/(cos(thetahat)^2);...
             -qhat*sin(phihat)-rhat*cos(phihat)                                                      0                        ];
     A = df_a;
-    P_a = P_a + P.Ts_estimator*(A*P_a + P_a*A' + P.Q_a);
+    P_a = P_a + P.Ts_estimator*(A*P_a + P_a*A' + Q_a);
 end
 
 % Measurement update
@@ -173,10 +174,10 @@ for i = 1:N
     f_gps = [Vghat*cos(chihat);...
              Vghat*sin(chihat);...
              ((Vahat*cos(psihat)+wnhat)*(-Vahat*psidot*sin(psihat)) + (Vahat*sin(psihat)+wehat)*(Vahat*psihat*cos(psihat)))/Vghat;...
-             P.g/Vghat*tan(psihat)*cos(chihat-psihat);...
+             P.g/Vghat*tan(phihat)*cos(chihat-psihat);...
              0;...
              0;...
-             qhat*sin(psihat)/cos(thetahat) + rhat*cos(psihat)/cos(thetahat)];
+             qhat*sin(phihat)/cos(thetahat) + rhat*cos(phihat)/cos(thetahat)];
 
          
     xhat_gps = xhat_gps + P.Ts_estimator*f_gps;
@@ -233,36 +234,35 @@ if any(abs(uu_gps - uu_gps_d1))
 end
 
 % Low pass filter these?
-hhat = h;
-phihat = xhat_a(1);
-thetahat = xhat_a(2);
-phat = p;
-qhat = q;
-rhat = r;
-Vahat = Va;
+alpha = 0.8;
+hhat = xhat_d1(3)*alpha + (1-alpha)*h;
+phat = xhat_d1(10)*alpha + (1-alpha)*p;
+qhat = xhat_d1(11)*alpha + (1-alpha)*q;
+rhat = xhat_d1(12)*alpha + (1-alpha)*r;
+Vahat = xhat_d1(4)*alpha + (1-alpha)*Va;
 
 uu_a_d1 = uu_a;
 uu_gps_d1 = uu_gps;
 xhat = [...
-    pnhat;...
-    pehat;...
-    hhat;...
-    Vahat;...
-    alphahat;...
-    betahat;...
-    phihat;...
-    thetahat;...
-    chihat;...
-    phat;...
-    qhat;...
-    rhat;...
-    Vghat;...
-    wnhat;...
-    wehat;...
-    psihat;...
-    bxhat;...
-    byhat;...
-    bzhat;...
+    pnhat;...1
+    pehat;...2
+    hhat;...3
+    Vahat;...4
+    alphahat;...5
+    betahat;...6
+    phihat;...7
+    thetahat;...8
+    chihat;...9
+    phat;...10
+    qhat;...11
+    rhat;...12
+    Vghat;...13
+    wnhat;...14
+    wehat;...15
+    psihat;...16
+    bxhat;...17
+    byhat;...18
+    bzhat;...19
     ];
 xhat_d1 = xhat;
 end
