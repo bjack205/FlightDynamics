@@ -79,18 +79,20 @@ P.delta_r_max = 45*pi/180;
 P.delta_e_max = 45*pi/180;
 
 % Sensor data
-P.sigma_gyro_x = 0.13;
-P.sigma_gyro_y = 0.13;
-P.sigma_gyro_z = 0.13;
+P.sigma_gyro_x = 0.13*pi/180;
+P.sigma_gyro_y = 0.13*pi/180;
+P.sigma_gyro_z = 0.13*pi/180;
 P.sigma_accel_x = 0.0025*P.g;
 P.sigma_accel_y = 0.0025*P.g;
 P.sigma_accel_z = 0.0025*P.g;
 P.sigma_p_abs = 0.01e3;
 P.sigma_p_diff = 0.002e3;
-P.beta_p_abs = 0.125e3;
+P.beta_p_abs = 0.125e3*0;
 P.beta_p_diff = 0.020e3;
 P.sigma_Vg = 0;
 P.sigma_chi = 0;
+P.sigma_gps = [0.21 0.21 0.40];
+P.sigma_v = 0.05;
 P.Ts_gps = 1;
 
 %% Compute trim conditions using 'mavsim_trim.mdl'
@@ -101,6 +103,7 @@ R     = Inf ;         % desired radius (m) - use (+) for right handed orbit,
 
 % autopilot sample rate
 P.Ts = 0.01;
+P.Ts_estimator = P.Ts/10;
 P.lambda = 100;
 P.Tau = 0.05;
 
@@ -145,22 +148,22 @@ P.r0     = x_trim(12);  % initial body frame yaw rate
 % linearize the equations of motion around trim conditions
 %[A_lon, B_lon, A_lat, B_lat] = compute_ss_model('mavsim_trim',x_trim,u_trim);
 
-%% Compute Gains
-
-%%%%%% Successive Loop Closure %%%%%%
-% Longitudinal Control
-P.altitude_take_off_zone = 0;    
-P.altitude_hold_zone = 30;       
-P.take_off_pitch = 45*pi/180;    
+%% Tune Gains
                     
-
 % Roll attitude
-P.e_phi_max = 60*pi/180;
-P.zeta_phi = 1.2;
+P.e_phi_max = 100*pi/180;
+P.zeta_phi = 6;
 
 % Course Hold
 P.W_chi = 20; % >5
 P.zeta_chi = 1;
+
+%%%%%% Successive Loop Closure %%%%%%
+
+% Longitudinal Control
+P.altitude_take_off_zone = 0;    
+P.altitude_hold_zone = 30;       
+P.take_off_pitch = 45*pi/180; 
 
 % Sideslip Hold
 P.e_beta_max = 15*pi/180;
@@ -188,12 +191,34 @@ P.zeta_v = 0.9;
 %%%%%% Total Energy Control %%%%%%
 P.h_e = 20;  
 
-P.kp_E = 1;
-P.kd_E = 2;
-P.ki_E = 0.5;
+% P.kp_E = 1;
+% P.kd_E = 2;
+% P.ki_E = 0.5;
+% 
+% P.kp_B = 2.5;
+% P.kd_B = 1.5;
+% P.ki_B = 0.5;
 
-P.kp_B = 2.5;
-P.kd_B = 1.5;
-P.ki_B = 0.5;
+% throttle
+P.kp_E = 1;
+P.kd_E = 0.8*P.kp_E;
+P.ki_E = 0.5*P.kp_E;
+
+% theta
+P.kp_B = 1;
+P.kd_B = 0.75*P.kp_B;
+P.ki_B = 0.5*P.kp_B;
+
+% % throttle
+% P.kp_E = 1;
+% P.kd_E = 2;
+% P.ki_E = 0.5;
+% 
+% % theta
+% P.kp_B = 2.5;
+% P.kd_B = 1.5;
+% P.ki_B = 0.5;
+
+%%%%%% Estimator Gains
 
 
