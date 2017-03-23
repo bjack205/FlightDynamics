@@ -332,7 +332,7 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
         init = true;
         Va = P.Va0;
         delta_e_d1 = 0;
-        delta_t_d1 = 0;
+        delta_t_d1 = P.u_trim(4);
         theta_d1 = 0;
     else
         init = false;
