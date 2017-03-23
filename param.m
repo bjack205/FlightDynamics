@@ -199,25 +199,25 @@ P.h_e = 20;
 % P.kd_B = 1.5;
 % P.ki_B = 0.5;
 
-% throttle
-P.kp_E = 1;
-P.kd_E = 0.8*P.kp_E;
-P.ki_E = 0.5*P.kp_E;
-
-% theta
-P.kp_B = 1;
-P.kd_B = 0.75*P.kp_B;
-P.ki_B = 0.5*P.kp_B;
-
 % % throttle
 % P.kp_E = 1;
-% P.kd_E = 2;
-% P.ki_E = 0.5;
+% P.kd_E = 0.8*P.kp_E;
+% P.ki_E = 0.5*P.kp_E;
 % 
 % % theta
-% P.kp_B = 2.5;
-% P.kd_B = 1.5;
-% P.ki_B = 0.5;
+% P.kp_B = 1;
+% P.kd_B = 0.75*P.kp_B;
+% P.ki_B = 0.5*P.kp_B;
+
+% throttle
+P.kp_E = 1;
+P.kd_E = 2;
+P.ki_E = 0.5;
+
+% theta
+P.kp_B = 2.5;
+P.kd_B = 1.5;
+P.ki_B = 0.5;
 
 %%%%%% Estimator Gains
 

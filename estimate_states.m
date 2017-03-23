@@ -78,7 +78,7 @@ if t == 0
     psihat = P.psi0;
     chihat = P.psi0;
     
-    P_a = diag([5*pi/180; 5*pi/180]);
+    P_a = diag([5*pi/180; 5*pi/180].^2);
     P_gps = diag([5 5 10 0.01 10 10 0.01].^2);
     
     uu_a_d1 = [-100, -100, -100];
