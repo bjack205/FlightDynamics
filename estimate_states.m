@@ -84,7 +84,27 @@ if t == 0
     uu_a_d1 = [-100, -100, -100];
     uu_gps_d1 = ones(1,7)*-100;
     
-    xhat_d1 = zeros(19,1);
+    xhat_d1 = [...
+        pnhat;...1
+        pehat;...2
+        hhat;...3
+        Vahat;...4
+        alphahat;...5
+        betahat;...6
+        phihat;...7
+        thetahat;...8
+        chihat;...9
+        phat;...10
+        qhat;...11
+        rhat;...12
+        Vghat;...13
+        wnhat;...14
+        wehat;...15
+        psihat;...16
+        bxhat;...17
+        byhat;...18
+        bzhat;...19
+        ];
 else
     
     pnhat = xhat_d1(1);
