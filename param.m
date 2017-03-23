@@ -64,7 +64,7 @@ P = GenCoefs(P);
 
 % wind parameters
 P.wind_n = 0;%3;
-P.wind_e = 0;%2;
+P.wind_e = 10;%2;
 P.wind_d = 0;
 P.L_u = 200;
 P.L_v = 200;
@@ -82,6 +82,9 @@ P.delta_e_max = 45*pi/180;
 P.sigma_gyro_x = 0.13*pi/180;
 P.sigma_gyro_y = 0.13*pi/180;
 P.sigma_gyro_z = 0.13*pi/180;
+P.bias_gyro_x = 1e-4;
+P.bias_gyro_y = 1e-4;
+P.bias_gyro_z = 1e-4;
 P.sigma_accel_x = 0.0025*P.g;
 P.sigma_accel_y = 0.0025*P.g;
 P.sigma_accel_z = 0.0025*P.g;
@@ -218,7 +221,5 @@ P.ki_E = 0.5;
 P.kp_B = 2.5;
 P.kd_B = 1.5;
 P.ki_B = 0.5;
-
-%%%%%% Estimator Gains
 
 
