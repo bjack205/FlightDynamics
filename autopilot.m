@@ -366,11 +366,11 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
     
     delta_t = TotalEnergy(Etot, init, P);
     theta_c = EnergyBalance(Ebal, init, P);
-    theta_c = alpha_theta*theta_d1 + (1-alpha_theta)*theta_c;
+    %theta_c = alpha_theta*theta_d1 + (1-alpha_theta)*theta_c;
     delta_e = pitch_hold(theta_c, theta, q, init, P);
     
-    delta_e = alpha_elev*delta_e_d1 + (1-alpha_elev)*delta_e;
-    delta_t = alpha_throttle*delta_t_d1 + (1-alpha_throttle)*delta_t;
+    %delta_e = alpha_elev*delta_e_d1 + (1-alpha_elev)*delta_e;
+    %delta_t = alpha_throttle*delta_t_d1 + (1-alpha_throttle)*delta_t;
     
     delta_e_d1 = delta_e;
     delta_t_d1 = delta_t;
@@ -446,7 +446,7 @@ if init == 1
 end
 error = theta_c - theta;
 D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
-u_unsat = P.kp_theta*error - P.kd_theta*q;
+u_unsat = P.kp_theta*error + P.kd_theta*q;
 delta_e = sat(u_unsat,P.delta_e_max);
 error_d1 = error;
 end
