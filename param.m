@@ -64,7 +64,7 @@ P = GenCoefs(P);
 
 % wind parameters
 P.wind_n = 0;%3;
-P.wind_e = 10;%2;
+P.wind_e = 0;%2;
 P.wind_d = 0;
 P.L_u = 200;
 P.L_v = 200;
