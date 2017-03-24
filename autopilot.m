@@ -47,7 +47,7 @@ function y = autopilot(uu,P)
         case 2,
            [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P);
         case 3,
-           [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P);
+           [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P,phi_ff);
     end
     y = [delta; x_command];
     
@@ -323,7 +323,7 @@ function [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,thet
 % autopilot_TECS
 %   - longitudinal autopilot based on total energy control systems
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P)
+function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P,phi_ff)
 
     %----------------------------------------------------------
     % lateral autopilot
@@ -342,6 +342,7 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
     delta_r = 0;%coordinated_turn_hold(beta, 1, P);
     
     phi_c   = course_hold(chi_c, chi, r, init, P);
+    phi_c = phi_c + phi_ff;
     phi_err = phi_c-phi;
     lim = 60*pi/180;
     if abs(phi_err) > lim
