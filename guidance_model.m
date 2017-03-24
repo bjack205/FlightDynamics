@@ -69,7 +69,7 @@ sizes = simsizes;
 sizes.NumContStates  = 7;
 sizes.NumDiscStates  = 0;
 sizes.NumOutputs     = 16+12;
-sizes.NumInputs      = 3;
+sizes.NumInputs      = 4;
 sizes.DirFeedthrough = 0;
 sizes.NumSampleTimes = 1;   % at least one sample time is needed
 
@@ -124,17 +124,28 @@ Va     = x(7); % airspeed
 Va_c   = u(1); % commanded airspeed
 h_c    = u(2); % commanded altitude
 chi_c  = u(3); % commanded heading angle
+phi_ff = u(4); % feedforward roll command
 
-psi = chi-asin(1/(Va*cos(0))*[P.wind_n P.wind_e]*[-sin(chi);cos(chi)]); % Equation 2.12
-chidot_c = 0;
-hdot_c = 0;
+% compute chi_c_dot from roll feedforward
+chi_c_dot = P.g/Va*tan(phi_ff);
 
-% Equations from 9.19
-pndot = Va*cos(psi) + P.wind_n;
-pedot = Va*sin(psi) + P.wind_e;
-chiddot = P.b_chidot*(chidot_c-chidot) + P.b_chi*(chi_c-chi);
-hddot = P.b_hdot*(hdot_c - hdot) + P.b_h*(h_c-h);
-Vadot = P.b_Va*(Va_c-Va);
+% solve for heading and groundspeed
+psi = chi - asin( (-P.wind_n*sin(chi)+P.wind_e*cos(chi))/Va );
+%Vg  = [cos(chi), sin(chi)]*(Va*[cos(psi); sin(psi)] + [wn; we]);
+
+% compute groundspeed
+pndot   = Va*cos(psi) + P.wind_n;
+pedot   = Va*sin(psi) + P.wind_e;
+chiddot = P.b_chidot*(chi_c_dot-chidot) + P.b_chi*(chi_c-chi);
+Vadot   = P.b_Va*(Va_c-Va);
+
+% don't let climb rate exceed Va*sin(\gamma_max)
+hddot   = -P.b_hdot*hdot + P.b_h*(h_c-h);
+if (hdot>=Va*sin(P.gamma_max)) & (hddot>0),
+    hddot = 0;
+elseif (hdot<=-Va*sin(P.gamma_max)) & (hddot<0),
+    hddot = 0;
+end
 
 
 sys = [...
@@ -192,7 +203,7 @@ Vg  = [cos(chi), sin(chi)]*(Va*[cos(psi); sin(psi)] + [wn; we]);
 phi     = atan(Vg*chidot/P.g);
 
 % letting theta equal flight path angle given by hdot = V sin(gamma)
-theta = real(asin(hdot/Va));
+theta = asin(hdot/Va);
 
 % set angular rates to zero
 p     = 0;
@@ -219,12 +230,8 @@ r     = 0;
 %   psihat   - estimate of heading angle
 % also need to return the normal state vector so that we don't need to
 % change the drawing routine.
-
 sys = [pn; pe; h; Va; alpha; beta; phi; theta; chi; p; q; r; Vg; wn; we; psi;...
     pn; pe; -h; Va; 0; 0; phi; theta; psi; p; q; r];
-if sum(imag(sys)) ~= 0 || length(sys) ~= 28
-    a = 1;
-end
 
 
 
