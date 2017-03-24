@@ -161,6 +161,8 @@ P.zeta_phi = 6;
 P.W_chi = 20; % >5
 P.zeta_chi = 1;
 
+P.phi_max = 60*pi/180;
+
 %%%%%% Successive Loop Closure %%%%%%
 
 % Longitudinal Control
@@ -231,6 +233,7 @@ P.b_Va     = 0.35;
 
 P.chi_inf = 70*pi/180;
 P.k_path = 0.01;
+P.k_orbit = 5;
 P.gamma_max = 45;
 
 

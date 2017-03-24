@@ -33,7 +33,8 @@ function y = autopilot(uu,P)
     Va_c     = uu(1+NN);  % commanded airspeed (m/s)
     h_c      = uu(2+NN);  % commanded altitude (m)
     chi_c    = uu(3+NN);  % commanded course (rad)
-    NN = NN+3;
+    phi_ff   = uu(4+NN);  % feedforward phi
+    NN = NN+4;
     t        = uu(1+NN);   % time
     
     autopilot_version = 3;
@@ -431,7 +432,7 @@ end
 error = chi_c - chi;
 I = I + (P.Ts/2)*(error + error_d1);
 u_unsat = P.kp_chi*error + P.ki_chi*I;
-phi_c = sat(u_unsat,60*pi/180);
+phi_c = sat(u_unsat,P.phi_max);
 if P.ki_chi~=0
     I = I + P.Ts/P.ki_chi * (phi_c-u_unsat);
 end
