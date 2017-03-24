@@ -81,7 +81,7 @@ switch flag
         h_c = -c_orbit(3);
         
         d = sqrt((p(1)-c_orbit(1))^2 + (p(2)-c_orbit(2))^2);
-        PSI = atan2(p(2)-c_orbit(2),p(1)-c_orbit(2));
+        PSI = atan2(p(2)-c_orbit(2),p(1)-c_orbit(1));
         while PSI-chi < - pi
             PSI = PSI+2*pi;
         end
@@ -91,7 +91,7 @@ switch flag
         
         chi_c = PSI + lam_orbit*(pi/2 + atan(P.k_orbit*(d-rho_orbit)/rho_orbit));
         
-        phi_ff = 0;
+        phi_ff = atan(Va^2/(P.g*rho_orbit));
 end
 
 % command airspeed equal to desired airspeed
