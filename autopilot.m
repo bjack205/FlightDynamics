@@ -550,7 +550,7 @@ error = Ebal;
 I = I + (P.Ts/2)*(Ebal + error_d1);
 D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
 u_unsat = P.kp_B*error + P.kd_B*D + P.ki_B*I;
-theta_c = sat(u_unsat,45*pi/180);
+theta_c = sat(u_unsat,P.gamma_max*pi/180);
 if P.ki_B ~= 0
     I = I + P.Ts/P.ki_B * (theta_c-u_unsat);
 end

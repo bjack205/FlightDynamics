@@ -223,15 +223,15 @@ P.kd_B = 1.5;
 P.ki_B = 0.5;
 
 %%%%% Guidance Model %%%%%%
-Mp_h = (126-120)/120;
-zeta_h = sqrt(log(Mp_h)^2/(log(Mp_h)^2+pi^2));
-wd_h = 13.6;
-wn_h = wd_h/sqrt(1-zeta_h^2);
-
 P.b_chidot = 1;
 P.b_chi    = 1;
 P.b_hdot   = 0.42;
 P.b_h      = 0.1;
 P.b_Va     = 0.35;
+
+P.chi_inf = 70*pi/180;
+P.k_path = 0.01;
+P.gamma_max = 45;
+
 
 
