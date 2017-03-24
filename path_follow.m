@@ -78,9 +78,19 @@ switch flag
         phi_ff = 0;
         
     case 2 % follow orbit specified by c, rho, lam
+        h_c = -c_orbit(3);
         
-        chi_c = 0;
-        h_c = 0;
+        d = sqrt((p(1)-c_orbit(1))^2 + (p(2)-c_orbit(2))^2);
+        PSI = atan2(p(2)-c_orbit(2),p(1)-c_orbit(2));
+        while PSI-chi < - pi
+            PSI = PSI+2*pi;
+        end
+        while PSI-chi > pi
+            PSI = PSI-2*pi;
+        end
+        
+        chi_c = PSI + lam_orbit*(pi/2 + atan(P.k_orbit*(d-rho_orbit)/rho_orbit));
+        
         phi_ff = 0;
 end
 
