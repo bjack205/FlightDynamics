@@ -136,8 +136,15 @@ psi = chi - asin( (-P.wind_n*sin(chi)+P.wind_e*cos(chi))/Va );
 % compute groundspeed
 pndot   = Va*cos(psi) + P.wind_n;
 pedot   = Va*sin(psi) + P.wind_e;
-chiddot = P.b_chidot*(chi_c_dot-chidot) + P.b_chi*(chi_c-chi);
 Vadot   = P.b_Va*(Va_c-Va);
+
+% 
+chiddot = P.b_chidot*(chi_c_dot-chidot) + P.b_chi*(chi_c-chi);
+if (chidot>=P.g/Va*tan(P.phi_max)) && (chiddot>0)
+    chiddot = 0;
+elseif (chidot<=-P.g/Va*tan(P.phi_max)) && (chiddot<0)
+    chiddot = 0;
+end
 
 % don't let climb rate exceed Va*sin(\gamma_max)
 hddot   = -P.b_hdot*hdot + P.b_h*(h_c-h);
