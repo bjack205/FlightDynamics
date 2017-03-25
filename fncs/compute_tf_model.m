@@ -78,7 +78,7 @@ P.ki_beta = ((a_beta1+a_beta2*P.kp_beta)/(2*P.zeta_beta))^2/a_beta2;
 % Pitch Attitude
 P.kp_theta = P.delta_e_max/P.e_theta_max*sign(a_theta3);
 P.wn_theta = sqrt(a_theta2 + P.delta_e_max/P.e_theta_max*abs(a_theta3));
-P.kd_theta = (2*P.zeta_theta*P.wn_theta - a_theta1)/a_theta3;
+P.kd_theta = -(2*P.zeta_theta*P.wn_theta - a_theta1)/a_theta3;
 P.Kdc_theta = P.kp_theta*a_theta3/(a_theta2 + P.kp_theta*a_theta3);
 
 % Altitude Hold
