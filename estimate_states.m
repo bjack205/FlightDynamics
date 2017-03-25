@@ -120,6 +120,7 @@ Q_a = diag([1e-8 1e-8]);
 Q_gps = diag([0.1 0.1 0.1 0.01 0.1 0.1 0.01]);
 
 % Noise Matrices
+P.sigma_v = P.sigma_gps_v;
 sigma_Vg = P.sigma_v;
 Vn = Va*cos(psihat)+wnhat;
 Ve = Va*sin(psihat)+wehat;

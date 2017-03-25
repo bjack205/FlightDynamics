@@ -95,7 +95,7 @@ P.beta_p_diff = 0.020e3;
 P.sigma_Vg = 0;
 P.sigma_chi = 0;
 P.sigma_gps = [0.21 0.21 0.40];
-P.sigma_v = 0.05;
+P.sigma_gps_v = 0.05;
 P.Ts_gps = 1;
 
 %% Compute trim conditions using 'mavsim_trim.mdl'
@@ -159,7 +159,7 @@ P.zeta_phi = 6;
 
 % Course Hold
 P.W_chi = 20; % >5
-P.zeta_chi = 1;
+P.zeta_chi = 1.5;
 
 %%%%%% Successive Loop Closure %%%%%%
 
