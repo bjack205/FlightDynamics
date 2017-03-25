@@ -59,6 +59,7 @@ byhat    = 0;
 bzhat    = 0;
 
 persistent xhat_d1 uu_a_d1 uu_gps_d1 P_a P_gps
+persistent lpf_static_pres lpf_diff_press
 
 if t == 0
     
@@ -85,6 +86,9 @@ if t == 0
     uu_gps_d1 = ones(1,7)*-100;
     
     xhat_d1 = zeros(19,1);
+    
+    lpf_static_pres = P.rho*P.gravity*(-P.pd0);
+    lpf_diff_press = 0.5*P.rho*P.Va0^2;
 else
     
     pnhat = xhat_d1(1);
@@ -104,12 +108,17 @@ else
     
 end
 
+% Filter Sensors Data
+alpha_pres = 0.95;
+lpf_static_pres = alpha_pres*lpf_static_pres + (1-alpha_pres)*y_static_pres;
+lpf_diff_press = alpha_pres*lpf_diff_press + (1-alpha_pres)*y_diff_pres;
+
 % Get values from sensors
 p = y_gyro_x;
 q = y_gyro_y;
 r = y_gyro_z;
-h = y_static_pres/(P.rho*P.g);
-Va = sqrt(2/P.rho*y_diff_pres);
+h = lpf_static_pres/(P.rho*P.g);
+Va = sqrt(2/P.rho*lpf_diff_press);
 pn = y_gps_n;
 pe = y_gps_e;
 chi = y_gps_course;
@@ -236,11 +245,13 @@ end
 
 % Low pass filter these?
 alpha = 0.8;
-hhat = xhat_d1(3)*alpha + (1-alpha)*h;
+alpha_Va = 0;
+alpha_h = 0.95;
+hhat = xhat_d1(3)*alpha_h + (1-alpha_h)*h;
 phat = xhat_d1(10)*alpha + (1-alpha)*p;
 qhat = xhat_d1(11)*alpha + (1-alpha)*q;
 rhat = xhat_d1(12)*alpha + (1-alpha)*r;
-Vahat = xhat_d1(4)*alpha + (1-alpha)*Va;
+Vahat = xhat_d1(4)*alpha_Va + (1-alpha_Va)*Va;
 
 uu_a_d1 = uu_a;
 uu_gps_d1 = uu_gps;
