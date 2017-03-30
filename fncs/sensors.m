@@ -44,8 +44,8 @@ function y = sensors(uu, P)
     y_accel_z = F_z/P.mass - P.g*cos(theta)*cos(phi) + randn*P.sigma_accel_z;
 
     % simulate pressure sensors
-    y_static_pres = P.rho*P.g*(-pd) + P.beta_p_abs + randn*P.sigma_p_abs;
-    y_diff_pres = P.rho*Va^2/2 + P.beta_p_diff + randn*P.sigma_p_diff;
+    y_static_pres = P.rho*P.g*(-pd) + P.beta_p_abs + randn*P.sigma_p_abs*0;
+    y_diff_pres = P.rho*Va^2/2 + P.beta_p_diff + randn*P.sigma_p_diff*0;
 
     % construct total output
     y = [...

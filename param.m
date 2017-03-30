@@ -63,8 +63,8 @@ P.G = GenGammas(P.Jx,P.Jy,P.Jz,P.Jxz);
 P = GenCoefs(P);
 
 % wind parameters
-P.wind_n = 0;%3;
-P.wind_e = 0;%2;
+P.wind_n = 3;%3;
+P.wind_e = 3;%2;
 P.wind_d = 0;
 P.L_u = 200;
 P.L_v = 200;
@@ -232,9 +232,26 @@ P.b_h      = 0.1;
 P.b_Va     = 0.35;
 
 P.chi_inf = 70*pi/180;
-P.k_path = 0.01;
-P.k_orbit = 5;
+P.k_path = 0.005;
+P.k_orbit = 2;
 P.gamma_max = 45;
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% Filtering %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% LPF Params
+P.lpf_a = 50; % Cutoff freq for lpf
+P.lpf_alpha = exp(-P.lpf_a*P.Ts);
+P.lpf_a1 = 1.5; % Cutoff freq for lpf
+P.lpf_alpha1 = exp(-P.lpf_a1*P.Ts);
+
+%%% GPS %%% from Table 7.2 pg. 139
+P.Ts_gps = 1.0; % s
+P.gps_k = 1/1100; % 1/s
+P.gps_sigma_n = 0.21; % m
+P.gps_sigma_e = 0.21; % m
+P.gps_sigma_alt = 0.40; % m
+P.gps_sigma_Vg = 0.05; % m/s
+P.gps_sigma_x = P.gps_sigma_Vg/P.Va0;

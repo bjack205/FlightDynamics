@@ -80,7 +80,8 @@ if t == 0
     chihat = P.psi0;
     
     P_a = diag([5*pi/180; 5*pi/180].^2);
-    P_gps = diag([5 5 10 0.01 10 10 0.01].^2);
+    %P_gps = diag([5 5 10 0.01 10 10 0.01].^2);
+    P_gps = diag([0.03, 0.03, 0.1^2, (5*pi/180), 0.2^2, 0.22^2, (5*pi/180)]);
     
     uu_a_d1 = [-100, -100, -100];
     uu_gps_d1 = ones(1,7)*-100;
@@ -129,7 +130,7 @@ else
 end
 
 % Filter Sensors Data
-alpha_pres = 0.95;
+alpha_pres = 0;
 lpf_static_pres = alpha_pres*lpf_static_pres + (1-alpha_pres)*y_static_pres;
 lpf_diff_press = alpha_pres*lpf_diff_press + (1-alpha_pres)*y_diff_pres;
 
@@ -146,7 +147,10 @@ Vg = y_gps_Vg;
 
 % Gains
 Q_a = diag([1e-8 1e-8]);
-Q_gps = diag([0.1 0.1 0.1 0.01 0.1 0.1 0.01]);
+a = 1e1;
+b = 1e-2;
+Q_gps = diag([a a a b a a b]);
+%Q_gps = diag([0.0001, 0.0001, 0.0001, 0.000001, 0.0001, 0.0001, 0.0001]);
 
 % Noise Matrices
 P.sigma_v = P.sigma_gps_v;
@@ -158,6 +162,7 @@ sigma_chi = P.sigma_v / Vg;
 
 Ri_a = diag([P.sigma_accel_x P.sigma_accel_y P.sigma_accel_z].^2);
 Ri_gps = diag([P.sigma_gps(1) P.sigma_gps(2) sigma_Vg sigma_chi 1e-6 1e-6].^2);
+%Ri_gps = diag([P.sigma_gps(1)^2, P.sigma_gps(2)^2, sigma_Vg^2, sigma_chi^2, 0.001, 0.001]);
 
 
 N = P.Ts/P.Ts_estimator;
@@ -196,6 +201,7 @@ end
 
 %% GPS Smoothing
 xhat_gps = [pnhat; pehat; Vghat; chihat; wnhat; wehat; psihat];
+gate_gps = [10; 10; 20; 20*pi/180; 10; 10; 20*pi/180];
 
 for i = 1:N
     psidot = qhat*sin(phihat)/cos(thetahat) + rhat*cos(phihat)/cos(thetahat);
@@ -251,12 +257,18 @@ if any(abs(uu_gps - uu_gps_d1))
     P_gps = (eye(7)-Li_gps*Ci_gps)*P_gps;
     
     y_gps = [y_gps_n; y_gps_e; y_gps_Vg; y_gps_course; y_wind_n; y_wind_e];
-    xhat_gps = xhat_gps + Li_gps*(y_gps - h_gps);
+    err = y_gps - h_gps;
+    if abs(y_gps(4) - h_gps(4)) > pi
+        err(4) = atan2(sin(err(4)),cos(err(4)));
+    end
+    
+    update = Li_gps*(err);
+    xhat_gps = xhat_gps + update;
     
     pnhat  = xhat_gps(1);
     pehat  = xhat_gps(2);
     Vghat  = xhat_gps(3);
-    chihat = xhat_gps(4);
+    chihat = atan2(sin(xhat_gps(4)),cos(xhat_gps(4)));
     wnhat  = xhat_gps(5);
     wehat  = xhat_gps(6);
     psihat = xhat_gps(7);
@@ -265,8 +277,8 @@ end
 
 % Low pass filter these?
 alpha = 0.8;
-alpha_Va = 0;
-alpha_h = 0.95;
+alpha_Va = 0.8;
+alpha_h = 0.8;
 hhat = xhat_d1(3)*alpha_h + (1-alpha_h)*h;
 phat = xhat_d1(10)*alpha + (1-alpha)*p;
 qhat = xhat_d1(11)*alpha + (1-alpha)*q;

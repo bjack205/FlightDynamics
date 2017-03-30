@@ -39,7 +39,7 @@ function out = path_manager_chap10(in)
   t         = in(1+NN);
  
 
-   if 1,
+   if 0,
     % define waypoint path
     flag   = 1;
     Va_d   = 35;
@@ -57,7 +57,7 @@ function out = path_manager_chap10(in)
     r      = [0; 0; 0];     % not used for orbit
     q      = [1; 0; 0];     % not used for orbit
     q      = q/norm(q);
-    c      = [1;1;-100];  % center of orbit
+    c      = [1;1;-10];  % center of orbit
     rho    = 400;            % radius of orbit
     lambda = 1;             % direction of orbit
 

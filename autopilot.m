@@ -355,9 +355,9 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
     % longitudinal autopilot based on total energy control
     
     % LPF delta_t and theta_c
-    alpha_throttle = 0.99;
-    alpha_theta = 0.95;
-    alpha_elev = 0.75;
+    alpha_throttle = 0;
+    alpha_theta = 0;
+    alpha_elev = 0;
     
     Knom = 1/2*P.mass*P.Va0^2;
     Kerr = 1/2*P.mass*(Va_c^2 - Va^2);
