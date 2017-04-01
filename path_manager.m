@@ -59,8 +59,8 @@ function out = path_manager(in,P)
     waypoints = reshape(in(2+NN:5*P.size_waypoint_array+1+NN),5,P.size_waypoint_array);
   
     if abs(waypoints(4,1))>=2*pi,
-        out = path_manager_line(in,P,start_of_simulation);  % follows straight-lines and switches at waypoints
-        %out = path_manager_fillet(in,P,start_of_simulation);  % smooths through waypoints with fillets
+        %out = path_manager_line(in,P,start_of_simulation);  % follows straight-lines and switches at waypoints
+        out = path_manager_fillet(in,P,start_of_simulation);  % smooths through waypoints with fillets
         start_of_simulation=0;
     else
         out = path_manager_dubins(in,P,start_of_simulation); % follows Dubins paths between waypoint configurations

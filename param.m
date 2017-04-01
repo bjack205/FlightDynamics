@@ -159,8 +159,8 @@ P.e_phi_max = 100*pi/180;
 P.zeta_phi = 6;
 
 % Course Hold
-P.W_chi = 20; % >5
-P.zeta_chi = 1.5;
+P.W_chi = 10; % >5
+P.zeta_chi = 1.2;
 
 P.phi_max = 60*pi/180;
 

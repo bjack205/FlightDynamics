@@ -67,7 +67,7 @@ function out = path_manager_fillet(in,P,start_of_simulation)
   
   % if the waypoints have changed, update the waypoint pointer
   if min(min(waypoints==waypoints_old))==0,
-      ptr_a = 1;
+      ptr_a = 2;
       waypoints_old = waypoints;
       state_transition = 1;
       flag_need_new_waypoints = 0;
@@ -79,40 +79,46 @@ w_curr = waypoints(1:3,ptr_a);
 w_next = waypoints(1:3,ptr_a+1);
 q_prev = w_curr-w_prev;
 q_prev = q_prev/norm(q_prev);
-q = w_next-w_curr;
-q = q/norm(q);
-q_bar = acos(-a_prev'*q_curr);
+q_curr = w_next-w_curr;
+q_curr = q_curr/norm(q_curr);
+q_bar = acos(-q_prev'*q_curr);
+
+% Half-plane function
+H = @(r,n,p) (p-r)'*n > 0; 
   
   % define transition state machine
-  switch state_transition,
-      case 1, % follow straight line from wpp_a to wpp_b
+  switch state_transition
+      case 1 % follow straight line from wpp_a to wpp_b
           flag   = 1;  % following straight line path
-          Va_d   = ; % desired airspeed along waypoint path
+          Va_d   = waypoints(5,ptr_a); % desired airspeed along waypoint path
           r      = w_prev;
           q      = q_prev;
-          q      = q/norm(q);
-          z      = w_curr-(P.R/tan(q_bar/2))*q_prev;
+          z      = w_curr-(P.R_min/tan(q_bar/2))*q_prev;
+          
+          if H(z,q_prev,p)
+              state_transition = 2;
+          end
           
           c      = [0;0;0];
           rho    = 0;
           lambda = 0;
           
              
-      case 2, % follow orbit from wpp_a-wpp_b to wpp_b-wpp_c
+      case 2 % follow orbit from wpp_a-wpp_b to wpp_b-wpp_c
           flag   = 2;  % following orbit
-          Va_d   = ; % desired airspeed along waypoint path
-          r      = [0;0;0];
-          q      = [0;0;1];
-          q      = q/norm(q);
-          q_next = 0;
-          q_next = q_next/norm(q_next);
-          beta   = 0;
-          c      = wi-(P.R/sin(q_bar/2))*q;
-          z      = w_curr + (P.R/sin(q_bar/2))*q;
+          Va_d   = waypoints(5,ptr_a); % desired airspeed along waypoint path
+          r      = [1;1;1]*-9999;
+          q      = [1;1;1]*-9999;
+
+          c      = w_curr-(P.R_min/sin(q_bar/2))*q;
+          rho    = P.R_min;
+          lambda = sign(q_prev(1)*q_curr(2) - q_prev(2)*q_curr(1));
+          z      = w_curr + (P.R_min/sin(q_bar/2))*q;
           
-          rho    = P.R;
-          lambda = ;
-          
+          if H(z,q_curr,p)
+              ptr_a = ptr_a + 1;
+              state_transition = 1;
+          end
 
   end
   
