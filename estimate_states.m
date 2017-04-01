@@ -108,7 +108,7 @@ if t == 0
         bzhat;...19
         ];
     
-    lpf_static_pres = P.rho*P.gravity*(-P.pd0);
+    lpf_static_pres = P.rho*P.g*(-P.pd0);
     lpf_diff_press = 0.5*P.rho*P.Va0^2;
 else
     
