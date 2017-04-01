@@ -57,14 +57,14 @@ function out = path_manager_line(in,P,start_of_simulation)
   persistent flag_need_new_waypoints % flag that request new waypoints from path planner
   
   
-  if start_of_simulation || isempty(waypoints_old),
+  if start_of_simulation || isempty(waypoints_old)
       waypoints_old = zeros(5,P.size_waypoint_array);
       flag_need_new_waypoints = 0;
      
   end
   
   % if the waypoints have changed, update the waypoint pointer
-  if min(min(waypoints==waypoints_old))==0,
+  if min(min(waypoints==waypoints_old))==0
       ptr_a = 2;
       waypoints_old = waypoints;
       flag_need_new_waypoints = 0;

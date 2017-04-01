@@ -36,7 +36,7 @@ function drawEnvironment(uu,P)
     % first time function is called, initialize plot and persistent vars
     if t==0,
 
-        figure(1), clf
+        figure(3), clf
         scale = 4;
        [Vertices,Faces,facecolors] = defineAircraftBody(scale);                              
         aircraft_handle = drawBody(Vertices,Faces,facecolors,...

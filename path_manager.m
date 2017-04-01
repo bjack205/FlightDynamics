@@ -39,7 +39,7 @@ function out = path_manager(in,P)
 
   NN = 0;
   num_waypoints = in(1+NN);
-  if num_waypoints==0, % start of simulation
+  if num_waypoints==0 % start of simulation
       flag   = 1;  % following straight line path
       Va_d   = P.Va0; % desired airspeed along waypoint path
       NN = NN + 1 + 5*P.size_waypoint_array;
@@ -58,12 +58,12 @@ function out = path_manager(in,P)
   else
     waypoints = reshape(in(2+NN:5*P.size_waypoint_array+1+NN),5,P.size_waypoint_array);
   
-    if abs(waypoints(4,1))>=2*pi,
+    if abs(waypoints(4,1))>=2*pi
         %out = path_manager_line(in,P,start_of_simulation);  % follows straight-lines and switches at waypoints
         out = path_manager_fillet(in,P,start_of_simulation);  % smooths through waypoints with fillets
         start_of_simulation=0;
     else
-        out = path_manager_dubins(in,P,start_of_simulation); % follows Dubins paths between waypoint configurations
+        [out] = path_manager_dubins(in,P,start_of_simulation); % follows Dubins paths between waypoint configurations
         start_of_simulation=0;
     end
   end

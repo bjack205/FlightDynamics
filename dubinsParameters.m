@@ -32,88 +32,92 @@ function dubinspath = dubinsParameters(start_node, end_node, R)
       disp('The distance between nodes must be larger than 2R.');
       dubinspath = [];
   else
-    
-    ps   = ;
-    chis = ;
-    pe   = ;
-    chie = ;
-    
+    Rz = @(x) [cos(x) -sin(x) 0; sin(x) cos(x) 0; 0 0 1];
+    ang = @(x) mod(x,2*pi);
+    NORM = @(x) x/norm(x);
+    vec_angle = @(s,e) atan2(e(2)-s(2),e(1)-s(1));
+      
+    ps   = start_node(1:3)';
+    chis = start_node(4);
+    pe   = end_node(1:3)';
+    chie = end_node(4);
 
-    crs = ;
-    cls = ;
-    cre = ;
-    cle = ;
+    crs = ps + R*Rz(pi/2)*[cos(chis);sin(chis);0];
+    cls = ps + R*Rz(-pi/2)*[cos(chis);sin(chis);0];
+    cre = pe + R*Rz(pi/2)*[cos(chie);sin(chie);0];
+    cle = pe + R*Rz(-pi/2)*[cos(chie);sin(chie);0];
     
    
     % compute L1
-    theta = ;
-    L1 = ;
+    theta = vec_angle(ps,pe);
+    L1 = norm(crs-cre) + R*ang(2*pi+ang(theta-pi/2)-ang(chis-pi/2))...
+        +R*ang(2*pi+ang(chie-pi/2)-ang(theta-pi/2));
+    
     % compute L2
-    ell = ;
-    theta = ;
-    theta2 = ;
-    if isreal(theta2)==0, 
+    theta2 = theta-pi/2+asin(2*R/ell);
+    if isreal(theta2)==0
       L2 = 9999; 
     else
-      L2 = ;
+      L2 = sqrt(ell^2-4*R^2) + R*ang(2*pi+ang(theta2)-ang(chis-pi/2))...
+          +R*ang(2*pi+ang(theta2+pi)-ang(chie+pi/2));
     end
     % compute L3
-    ell = ;
-    theta = ;
-    theta2 = ;
-    if isreal(theta2)==0,
+    theta2 = acos(2*R/ell);
+    if isreal(theta2)==0
       L3 = 9999;
     else
-      L3 = ;
+      L3 = sqrt(ell^2-4*R^2) + R*ang(2*pi+ang(chis+pi/2)-ang(theta+theta2))...
+          +R*ang(2*pi+ang(chie-pi/2)-ang(theta+theta2-pi));
     end
     % compute L4
-    theta = ;
-    L4 = ;
+    L4 = norm(cls-cle)+R*ang(2*pi+ang(chis+pi/2)-ang(theta+pi/2))...
+        +R*ang(2*pi+ang(theta+pi/2)-ang(chie+pi/2));
+    
     % L is the minimum distance
     [L,idx] = min([L1,L2,L3,L4]);
     e1 = [1; 0; 0];
-    switch(idx),
-        case 1,
-            cs = ;
-            lams = ;
-            ce = ;
-            lame = ;
-            q1 = ;
-            w1 = ;
-            w2 = ;
-        case 2,   
-            cs = ;
-            lams = ;
-            ce = ;
-            lame = ;
-            ell = ;
-            theta = ;
-            theta2 = ;
-            q1 = ;
-            w1 = ;
-            w2 = ;
-        case 3,
-            cs =;
-            lams =;
-            ce = ;
-            lame = ;
-            ell = ;
-            theta = ;
-            theta2 = ;
-            q1 = ;
-            w1 = ;
-            w2 = ;
-         case 4,
-            cs = ;
-            lams = ;
-            ce = ;
-            lame = ;
-            q1 = ;
-            w1 = ;
-            w2 = ;
+    switch(idx)
+        case 1
+            cs = crs;
+            lams = 1;
+            ce = cre;
+            lame = 1;
+            q1 = NORM(ce-cs);
+            w1 = cs+R*Rz(-pi/2)*q1;
+            w2 = ce+R*Rz(-pi/2)*q1;
+        case 2   
+            cs = crs;
+            lams = 1;
+            ce = cle;
+            lame = -1;
+            theta = vec_angle(cs,ce);
+            ell = norm(ce-cs);
+            theta2 = theta-pi/2+asin(2*R/ell);
+            q1 = Rz(theta2+pi/2)*e1;
+            w1 = cs+R*Rz(theta2)*e1;
+            w2 = ce+R*Rz(theta2+pi)*e1;
+        case 3
+            cs = cls;
+            lams = -1;
+            ce = cre;
+            lame = 1;
+            theta = vec_angle(ce,cs);
+            ell = norm(ce-se);
+            theta2 = acos(2*R/ell);
+            q1 = Rz(theta+theta2-pi/2)*e1;
+            w1 = cs+R*Rz(theta+theta2)*e1;
+            w2 = ce+R*Rz(theta+theta2-pi)*e1;
+         case 4
+            cs = cls;
+            lams = -1;
+            ce = cle;
+            lame = -1;
+            q1 = NORM(ce-cs);
+            w1 = cs+R*Rz(pi/2)*q1;
+            w2 = ce+R*Rz(pi/2)*q1;
     end
-    w3 = ;
-    q3 = ;
+    w3 = pe;
+    q3 = Rz(chie)*e1;
     
     % assign path variables
     dubinspath.ps   = ps;
