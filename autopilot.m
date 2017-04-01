@@ -342,9 +342,9 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
     delta_r = 0;%coordinated_turn_hold(beta, 1, P);
     
     phi_c   = course_hold(chi_c, chi, r, init, P);
-    phi_c = phi_c + phi_ff;
+    %phi_c = phi_c + phi_ff;
     phi_err = phi_c-phi;
-    lim = 60*pi/180;
+    lim = 300*pi/180;
     if abs(phi_err) > lim
         phi_c = phi+lim*sign(phi_err);
     end
