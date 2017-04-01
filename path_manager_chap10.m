@@ -14,11 +14,11 @@
 %   rho  - radius of orbit
 %   lambda = direction of orbit (+1 for CW, -1 for CCW)
 %
-function out = path_manager_chap10(in)
+function out = path_manager_chap10(in,P)
 
   NN = 0;
-  waypoints = in(1+NN);
-  NN = NN + 1;
+  num_waypoints = in(1+NN);
+  NN = NN + 1 + 5*P.size_waypoint_array;
   pn        = in(1+NN);
   pe        = in(2+NN);
   h         = in(3+NN);
@@ -35,15 +35,16 @@ function out = path_manager_chap10(in)
   % wn      = in(14+NN);
   % we      = in(15+NN);
   % psi     = in(16+NN);
+  state     =  in(1+NN:16+NN);
   NN = NN + 16;
   t         = in(1+NN);
  
 
-   if 0,
+   if 1,
     % define waypoint path
     flag   = 1;
     Va_d   = 35;
-    r      = [0; 0; -100];
+    r      = [300; 0; -100];
     q      = [-1/2; -1; -0.05];
     q      = q/norm(q);
     c      = [0;0;0];          % not used for waypoint path
@@ -63,6 +64,6 @@ function out = path_manager_chap10(in)
 
    end
    
-    out = [flag; Va_d; r; q; c; rho; lambda];
+    out = [flag; Va_d; r; q; c; rho; lambda; state; 0];
 
 end

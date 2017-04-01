@@ -21,6 +21,8 @@ function drawPathError(uu)
     c_orbit   = [uu(9+NN); uu(10+NN); uu(11+NN)];
     rho_orbit = uu(12+NN);
     lam_orbit = uu(13+NN);
+    NN = NN + 14;
+    waypoints = reshape(uu(NN+1:end),5,[]);
 
 
     % define persistent variables 
@@ -30,23 +32,29 @@ function drawPathError(uu)
     persistent facecolors
 
     % first time function is called, initialize plot and persistent vars
+    S = 1000;
     if t==0,
 
         figure(4), clf
-        S = 1000;
-        switch flag_path,
-            case 1,
-                XX = [r_path(1), r_path(1)+S*q_path(1)];
-                YY = [r_path(2), r_path(2)+S*q_path(2)];
-                ZZ = [r_path(3), r_path(3)+S*q_path(3)];
-            case 2,
-                N = 100;
-                th = [0:2*pi/N:2*pi];
-                XX = c_orbit(1) + rho_orbit*cos(th);
-                YY = c_orbit(2) + rho_orbit*sin(th);
-                ZZ = c_orbit(3)*ones(size(th));
+        
+        if 0
+            switch flag_path,
+                case 1,
+                    XX = [r_path(1), r_path(1)+S*q_path(1)];
+                    YY = [r_path(2), r_path(2)+S*q_path(2)];
+                    ZZ = [r_path(3), r_path(3)+S*q_path(3)];
+                case 2,
+                    N = 100;
+                    th = [0:2*pi/N:2*pi];
+                    XX = c_orbit(1) + rho_orbit*cos(th);
+                    YY = c_orbit(2) + rho_orbit*sin(th);
+                    ZZ = c_orbit(3)*ones(size(th));
+            end
+            plot3(YY,XX,-ZZ,'r')
+        else
+            wps = waypoints(1:3,:);
+            plot3(wps(2,:),wps(1,:),-wps(3,:),'r') 
         end
-        plot3(YY,XX,-ZZ,'r')
         hold on
         [Vertices,Faces,facecolors] = defineAircraftBody;                
         aircraft_handle = drawBody(Vertices,Faces,facecolors,...
@@ -62,13 +70,22 @@ function drawPathError(uu)
         
         
     % at every other time step, redraw MAV
-    else 
+    else
+        FollowPlane(aircraft_handle,pn,pe,pd,S);
         drawBody(Vertices,Faces,facecolors,...
                      pn,pe,pd,phi,theta,psi,...
                      aircraft_handle);
     end
 %    figure(1), plot3(pe,pn,-pd,'.k');
 end
+
+
+function FollowPlane(vehicle_handle,pn,pe,pd,S)
+xlim(vehicle_handle.Parent,pe+[-S S])
+ylim(vehicle_handle.Parent,pn+[-S S])
+zlim(vehicle_handle.Parent,-pd+[-S S])
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function handle = drawBody(V,F,colors,...

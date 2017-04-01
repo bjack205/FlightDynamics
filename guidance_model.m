@@ -210,7 +210,7 @@ Vg  = [cos(chi), sin(chi)]*(Va*[cos(psi); sin(psi)] + [wn; we]);
 phi     = atan(Vg*chidot/P.g);
 
 % letting theta equal flight path angle given by hdot = V sin(gamma)
-theta = asin(hdot/Va);
+theta = real(asin(hdot/Va));
 
 % set angular rates to zero
 p     = 0;
@@ -239,6 +239,10 @@ r     = 0;
 % change the drawing routine.
 sys = [pn; pe; h; Va; alpha; beta; phi; theta; chi; p; q; r; Vg; wn; we; psi;...
     pn; pe; -h; Va; 0; 0; phi; theta; psi; p; q; r];
+a = imag(sys);
+if sum(a) ~= 0
+    b = 1;
+end
 
 
 

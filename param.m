@@ -63,8 +63,8 @@ P.G = GenGammas(P.Jx,P.Jy,P.Jz,P.Jxz);
 P = GenCoefs(P);
 
 % wind parameters
-P.wind_n = 3;%3;
-P.wind_e = 3;%2;
+P.wind_n = 0;%3;
+P.wind_e = 0;%2;
 P.wind_d = 0;
 P.L_u = 200;
 P.L_v = 200;
@@ -102,7 +102,8 @@ P.Ts_gps = 1;
 % initial airspeed
 P.Va0 = 35;
 gamma = 00*pi/180;  % desired flight path angle (radians)
-R     = Inf ;         % desired radius (m) - use (+) for right handed orbit, 
+R     = Inf ;         % desired radius (m) - use (+) for right handed orbit,
+h0    = 0;
 
 % autopilot sample rate
 P.Ts = 0.01;
@@ -114,7 +115,7 @@ P.Tau = 0.05;
 P.pn0    = 0;  % initial North position
 P.pe0    = 0;  % initial East position
 P.pd0    = 0;  % initial Down position (negative altitude)
-P.u0     = P.Va0; % initial velocity along body x-axis
+P.u0     = -h0; % initial velocity along body x-axis
 P.v0     = 0;  % initial velocity along body y-axis
 P.w0     = 0;  % initial velocity along body z-axis
 P.phi0   = 0;  % initial roll angle
@@ -255,3 +256,19 @@ P.gps_sigma_e = 0.21; % m
 P.gps_sigma_alt = 0.40; % m
 P.gps_sigma_Vg = 0.05; % m/s
 P.gps_sigma_x = P.gps_sigma_Vg/P.Va0;
+
+
+%% Planning
+% chapter 11 - path manager
+% number of waypoints in data structure
+P.size_waypoint_array = 100;
+P.R_min = P.Va0^2/P.g/tan(P.phi_max);
+
+% create random city map
+city_width      = 2000;  % the city is of size (width)x(width)
+building_height = 300;   % maximum height of buildings
+%building_height = 1;   % maximum height of buildings (for camera)
+num_blocks      = 5;    % number of blocks in city
+street_width    = .8;   % percent of block that is street.
+P.pd0           = -h0;  % initial height of MAV
+P.map = createWorld(city_width, building_height, num_blocks, street_width);

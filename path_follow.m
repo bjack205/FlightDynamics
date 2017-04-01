@@ -58,7 +58,7 @@ t         = in(1+NN);
 p = [pn;pe;-h];
 switch flag
     case 1 % follow straight line path specified by r and q
-        e = p - r;
+        e = p - r_path;
         n = cross(q_path,[0;0;1]);
         n = n/norm(n);
         s = e - (dot(e,n))*n;
@@ -72,7 +72,7 @@ switch flag
         while chi_q - chi > pi
             chi_q = chi_q - 2*pi;
         end
-        e_p_y = -sin(chi_q)*(p(1)-r(1)) + cos(chi_q)*(p(2)-r_path(2));
+        e_p_y = -sin(chi_q)*(p(1)-r_path(1)) + cos(chi_q)*(p(2)-r_path(2));
         chi_c = chi_q - P.chi_inf*2/pi*atan(P.k_path*e_p_y);
         
         phi_ff = 0;
