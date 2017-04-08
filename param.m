@@ -262,7 +262,7 @@ P.gps_sigma_x = P.gps_sigma_Vg/P.Va0;
 % chapter 11 - path manager
 % number of waypoints in data structure
 P.size_waypoint_array = 100;
-P.R_min = P.Va0^2/P.g/tan(45*pi/180);
+P.R_min = P.Va0^2/P.g/tan(60*pi/180);
 
 % create random city map
 city_width      = 2000;  % the city is of size (width)x(width)
