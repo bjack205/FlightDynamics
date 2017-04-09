@@ -33,7 +33,7 @@ function out = path_manager(in,P)
   persistent start_of_simulation
   
   t = in(end);
-  if t==0,
+  if t==0
       start_of_simulation = 1;
   end
 

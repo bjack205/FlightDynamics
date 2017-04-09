@@ -34,7 +34,10 @@ function out = path_planner(in,P,map)
   persistent wpp
   
 
-  if (t==0) || flag_new_waypoints,
+  if (t==0) || flag_new_waypoints
+      if flag_new_waypoints
+          disp('Requesting new waypoints');
+      end
     % format for each point is [pn, pe, pd, chi, Va^d] where the position
     % of the waypoint is (pn, pe, pd), the desired course at the waypoint
     % is chi, and the desired airspeed between waypoints is Va

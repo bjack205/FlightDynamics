@@ -28,9 +28,9 @@
 function dubinspath = dubinsParameters(start_node, end_node, R)
 
   ell = norm(start_node(1:2)-end_node(1:2));
-  if ell<3*R,
-      disp('The distance between nodes must be larger than 2R.');
-      dubinspath = [];
+  dubinspath = [];
+  if ell<(3*R-1e-6)
+      disp('The distance between nodes must be larger than 3R.');
   else
     Rz = @(x) [cos(x) -sin(x) 0; sin(x) cos(x) 0; 0 0 1];
     ang = @(x) mod(x,2*pi);
@@ -78,7 +78,7 @@ function dubinspath = dubinsParameters(start_node, end_node, R)
     
     % L is the minimum distance
     [L,idx] = min([L1,L2,L3,L4]);
-    disp(['Case ' num2str(idx)])
+    %disp(['Case ' num2str(idx)])
     e1 = [1; 0; 0];
     switch(idx)
         case 1
@@ -96,6 +96,10 @@ function dubinspath = dubinsParameters(start_node, end_node, R)
             lame = -1;
             theta = vec_angle(cs,ce);
             ell = norm(ce-cs);
+            if ell < 2*R
+                %disp('Circle centers too close')
+                return;
+            end
             theta2 = theta-pi/2+asin(2*R/ell);
             q1 = Rz(theta2+pi/2)*e1;
             w1 = cs+R*Rz(theta2)*e1;
@@ -107,6 +111,10 @@ function dubinspath = dubinsParameters(start_node, end_node, R)
             lame = 1;
             theta = vec_angle(cs,ce);
             ell = norm(ce-cs);
+            if ell < 2*R
+                %disp('Circle centers too close')
+                return;
+            end
             theta2 = acos(2*R/ell);
             q1 = Rz(theta+theta2-pi/2)*e1;
             w1 = cs+R*Rz(theta+theta2)*e1;

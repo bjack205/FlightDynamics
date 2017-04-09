@@ -21,7 +21,7 @@ function drawEnvironment(uu,P)
     NN = NN + 13;
     num_waypoints = uu(1+NN);
     waypoints     = reshape(uu(2+NN:5*num_waypoints+1+NN),5,num_waypoints)'; 
-
+    
 
     % define persistent variables 
     persistent aircraft_handle;  % figure handle for MAV
@@ -30,11 +30,17 @@ function drawEnvironment(uu,P)
     persistent Faces
     persistent Vertices
     persistent facecolors
-
+    
+    if (~isempty(aircraft_handle) && ~ishandle(aircraft_handle)) ||...
+       (~isempty(path_handle) && ~ishandle(path_handle)) ||...
+       (~isempty(waypoint_handle) && ~ishandle(waypoint_handle))
+        a = 1;
+        
+    end
     S = 2000; % plot size
     
     % first time function is called, initialize plot and persistent vars
-    if t==0,
+    if t==0
 
         figure(3), clf
         scale = 4;
@@ -82,7 +88,7 @@ function handle = drawBody(V,F,colors,...
       ];
   V = V*R;
 
-  if isempty(handle),
+  if isempty(handle)
     handle = patch('Vertices', V, 'Faces', F,...
                  'FaceVertexCData',colors,...
                  'FaceColor','flat',...
@@ -103,12 +109,12 @@ function handle = drawPath(path, S, handle, mode)
     rho  = path(12);
     lam  = path(13);
 
-    switch flag,
-        case 1,
+    switch flag
+        case 1
             XX = [r(1), r(1)+S*q(1)];
             YY = [r(2), r(2)+S*q(2)];
             ZZ = [r(3), r(3)+S*q(3)];
-        case 2,
+        case 2
             N = 100;
             th = [0:2*pi/N:2*pi];
             XX = c(1) + rho*cos(th);
@@ -116,7 +122,7 @@ function handle = drawPath(path, S, handle, mode)
             ZZ = c(3)*ones(size(th));
     end
     
-    if isempty(handle),
+    if isempty(handle)
         handle = plot3(YY,XX,-ZZ,'r', 'EraseMode', mode);
     else
         set(handle,'XData', YY, 'YData', XX, 'ZData', -ZZ);
@@ -127,14 +133,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function handle = drawWaypoints(waypoints, R_min, handle, mode)
 
-    if waypoints(1,4)==-9999, % check to see if Dubins paths
+    if waypoints(1,4)==-9999 % check to see if Dubins paths
         XX = [waypoints(:,1)];
         YY = [waypoints(:,2)];
         ZZ = [waypoints(:,3)];
     else
         XX = [];
         YY = [];
-        for i=2:size(waypoints,1),
+        for i=2:size(waypoints,1)
             dubinspath = dubinsParameters(waypoints(i-1,:),waypoints(i,:),R_min);
             [tmpX,tmpY] = pointsAlongDubinsPath(dubinspath,0.1);
             XX = [XX; tmpX];
@@ -143,7 +149,7 @@ function handle = drawWaypoints(waypoints, R_min, handle, mode)
         ZZ = waypoints(i,3)*ones(size(XX));
     end
     
-    if isempty(handle),
+    if isempty(handle)
         handle = plot3(YY,XX,-ZZ,'b', 'EraseMode', mode);
     else
         set(handle,'XData', YY, 'YData', XX, 'ZData', -ZZ);

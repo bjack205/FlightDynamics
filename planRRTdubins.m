@@ -9,7 +9,7 @@
 function path_out = planRRTdubins(wpp_start, wpp_end, R_min, map)
 
 % standard length of path segments
-segmentLength = 3.25*R_min;
+segmentLength = 5*R_min;
 
 % desired down position is down position of end node
 pd = wpp_end(3);
@@ -33,11 +33,13 @@ else
         [tree,flag] = extendTree(tree,end_node,segmentLength,map,pd,chi,R_min);
         numPaths = numPaths + flag;
     end
+    % find path with minimum cost to end_node
+    path = findMinimumPath(tree,end_node);
 end
 
-% find path with minimum cost to end_node
-path = findMinimumPath(tree,end_node);
+
 path_out = smoothPath(path,map,R_min);
+%path_out = path;
 plotmap(map,path,path_out,tree);
 
 end
@@ -66,6 +68,7 @@ collision_flag = 0;
 
 dubinsPath = dubinsParameters(start_node,end_node,R_min);
 if isempty(dubinsPath)
+    collision_flag = 1;
     return;
 end
 
@@ -175,7 +178,7 @@ while flag1==0
     tmp = tree(:,1:3)-ones(size(tree,1),1)*randomNode(1:3);
     [dist,idx] = min(diag(tmp*tmp'));
     L = min(sqrt(dist), segmentLength);
-    L = max(3*R_min,L);
+    L = max(3.25*R_min,L);
     cost     = tree(idx,5) + L;
     tmp = randomNode(1:3)-tree(idx,1:3);
     new_point = tree(idx,1:3)+L*(tmp/norm(tmp));
@@ -234,8 +237,8 @@ function newPath = smoothPath(path,map,R_min)
 
 newPath = path(1,:); % add the start node
 ptr =2;  % pointer into the path
-while ptr <= size(path,1)-1,
-    if collision(newPath(end,:), path(ptr+1,:), map, R_min)~=0, % if there is a collision
+while ptr <= size(path,1)-1
+    if collision(newPath(end,:), path(ptr+1,:), map, R_min)~=0 % if there is a collision
         newPath = [newPath; path(ptr,:)];  % add previous node
     end
     ptr=ptr+1;
@@ -250,7 +253,7 @@ end
 function plotmap(map,path,smoothedPath,tree)
 
 % setup plot
-figure(3), clf
+figure(5), clf
 axis([0,map.width,0,map.width,0,2*map.MaxHeight]);
 xlabel('E')
 ylabel('N')
@@ -262,8 +265,8 @@ V = [];
 F = [];
 patchcolors = [];
 count = 0;
-for i=1:map.NumBlocks,
-    for j=1:map.NumBlocks,
+for i=1:map.NumBlocks
+    for j=1:map.NumBlocks
         [Vtemp,Ftemp,patchcolorstemp] = buildingVertFace(map.buildings_n(i),...
             map.buildings_e(j),map.BuildingWidth,map.heights(j,i));
         V = [V; Vtemp];
