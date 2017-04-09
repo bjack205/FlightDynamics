@@ -1,6 +1,9 @@
 addpath('utils')
 addpath('fncs')
 addpath('media')
+addpath('model')
+addpath('path_planning')
+addpath('plotting')
 P.g = 9.8;
    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
