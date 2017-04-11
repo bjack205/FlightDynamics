@@ -4,6 +4,7 @@ addpath('media')
 addpath('model')
 addpath('path_planning')
 addpath('plotting')
+addpath('following')
 P.g = 9.8;
    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -235,10 +236,23 @@ P.b_hdot   = 0.42;
 P.b_h      = 0.1;
 P.b_Va     = 0.35;
 
+
+%%%%% Path Following Gains %%%%%
 P.chi_inf = 70*pi/180;
 P.k_path = 0.005;
 P.k_orbit = 2;
 P.gamma_max = 45;
+
+%%%%% Plane Following Gains %%%%
+P.follow_frame = 'body';
+
+P.Va_max = 35;
+P.Va_min = 25;
+P.delta_x_max = 500;
+P.n_Va = 3; % Needs to be odd
+
+P.k_follow = 0.01;
+P.chi_inf_follow = 70*pi/180;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -262,6 +276,7 @@ P.gps_sigma_x = P.gps_sigma_Vg/P.Va0;
 
 
 %% Planning
+
 % chapter 11 - path manager
 % number of waypoints in data structure
 P.size_waypoint_array = 100;
@@ -275,3 +290,5 @@ num_blocks      = 5;    % number of blocks in city
 street_width    = .8;   % percent of block that is street.
 P.pd0           = -h0;  % initial height of MAV
 P.map = createWorld(city_width, building_height, num_blocks, street_width);
+
+

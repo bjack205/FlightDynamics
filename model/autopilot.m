@@ -42,11 +42,11 @@ function y = autopilot(uu,P)
         % autopilot_version == 2 <- standard autopilot defined in book
         % autopilot_version == 3 <- Total Energy Control for longitudinal AP
     switch autopilot_version
-        case 1,
+        case 1
            [delta, x_command] = autopilot_tuning(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P);
-        case 2,
+        case 2
            [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P);
-        case 3,
+        case 3
            [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P,phi_ff);
     end
     y = [delta; x_command];
