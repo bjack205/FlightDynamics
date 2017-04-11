@@ -33,7 +33,8 @@ function y = autopilot(uu,P)
     Va_c     = uu(1+NN);  % commanded airspeed (m/s)
     h_c      = uu(2+NN);  % commanded altitude (m)
     chi_c    = uu(3+NN);  % commanded course (rad)
-    NN = NN+3;
+    phi_ff   = uu(4+NN);  % feedforward phi
+    NN = NN+4;
     t        = uu(1+NN);   % time
     
     autopilot_version = 3;
@@ -46,7 +47,7 @@ function y = autopilot(uu,P)
         case 2,
            [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P);
         case 3,
-               [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P);
+           [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P,phi_ff);
     end
     y = [delta; x_command];
     
@@ -322,36 +323,61 @@ function [delta, x_command] = autopilot_uavbook(Va_c,h_c,chi_c,Va,h,chi,phi,thet
 % autopilot_TECS
 %   - longitudinal autopilot based on total energy control systems
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P)
+function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p,q,r,t,P,phi_ff)
 
     %----------------------------------------------------------
     % lateral autopilot
     % lateral autopilot
+    persistent delta_t_d1 delta_e_d1 theta_d1
     if t==0
         init = true;
         Va = P.Va0;
+        delta_e_d1 = 0;
+        delta_t_d1 = P.u_trim(4);
+        theta_d1 = 0;
     else
         init = false;
     end
     % assume no rudder, therefore set delta_r=0
     delta_r = 0;%coordinated_turn_hold(beta, 1, P);
+    
     phi_c   = course_hold(chi_c, chi, r, init, P);
+    %phi_c = phi_c + phi_ff;
+    phi_err = phi_c-phi;
+    lim = 300*pi/180;
+    if abs(phi_err) > lim
+        phi_c = phi+lim*sign(phi_err);
+    end
     delta_a = roll_hold(phi_c, phi, p, init, P);      
   
     
     %----------------------------------------------------------
     % longitudinal autopilot based on total energy control
     
+    % LPF delta_t and theta_c
+    alpha_throttle = 0;
+    alpha_theta = 0;
+    alpha_elev = 0;
+    
     Knom = 1/2*P.mass*P.Va0^2;
     Kerr = 1/2*P.mass*(Va_c^2 - Va^2);
     Uerr = P.mass*P.g*(h_c - h);
     
     Etot = (Kerr + Uerr)/Knom;
-    Ebal = (Kerr - Uerr)/Knom;
+    Ebal = (Uerr - Kerr)/Knom;
     
     delta_t = TotalEnergy(Etot, init, P);
-    theta_c = -EnergyBalance(Ebal, init, P);
+    theta_c = EnergyBalance(Ebal, init, P);
+    %theta_c = alpha_theta*theta_d1 + (1-alpha_theta)*theta_c;
     delta_e = pitch_hold(theta_c, theta, q, init, P);
+    
+    %delta_e = alpha_elev*delta_e_d1 + (1-alpha_elev)*delta_e;
+    %delta_t = alpha_throttle*delta_t_d1 + (1-alpha_throttle)*delta_t;
+    
+    delta_e_d1 = delta_e;
+    delta_t_d1 = delta_t;
+    theta_d1 = theta_c;
+    
     
     %----------------------------------------------------------
     % create outputs
@@ -407,7 +433,7 @@ end
 error = chi_c - chi;
 I = I + (P.Ts/2)*(error + error_d1);
 u_unsat = P.kp_chi*error + P.ki_chi*I;
-phi_c = sat(u_unsat,P.e_phi_max);
+phi_c = sat(u_unsat,P.phi_max);
 if P.ki_chi~=0
     I = I + P.Ts/P.ki_chi * (phi_c-u_unsat);
 end
@@ -422,7 +448,7 @@ if init == 1
 end
 error = theta_c - theta;
 D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
-u_unsat = P.kp_theta*error - P.kd_theta*q;
+u_unsat = P.kp_theta*error + P.kd_theta*q;
 delta_e = sat(u_unsat,P.delta_e_max);
 error_d1 = error;
 end
@@ -507,7 +533,7 @@ end
 error = Etot;
 I = I + (P.Ts/2)*(Etot + error_d1);
 D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
-u_unsat = P.kp_E*error + P.kd_E*D + P.ki_E*I;
+u_unsat = P.kp_E*error + P.kd_E*D + P.ki_E*I + P.u_trim(4)*0;
 delta_t = sat(u_unsat,1,0);
 if P.ki_E ~= 0
     I = I + P.Ts/P.ki_E * (delta_t-u_unsat);
@@ -526,11 +552,14 @@ error = Ebal;
 I = I + (P.Ts/2)*(Ebal + error_d1);
 D = (2*P.Tau-P.Ts)/(2*P.Tau+P.Ts)*D + 2/(2*P.Tau+P.Ts)*(error-error_d1);
 u_unsat = P.kp_B*error + P.kd_B*D + P.ki_B*I;
-theta_c = sat(u_unsat,45*pi/180);
+theta_c = sat(u_unsat,P.gamma_max*pi/180);
 if P.ki_B ~= 0
     I = I + P.Ts/P.ki_B * (theta_c-u_unsat);
 end
 error_d1 = error;
+if u_unsat > 45*pi/180
+    a = 1;
+end
 end
 
   
