@@ -41,7 +41,14 @@ y_gps_e       = uu(10);
 y_gps_h       = uu(11);
 y_gps_Vg      = uu(12);
 y_gps_course  = uu(13);
-t             = uu(14);
+plane         = uu(14);
+
+if length(uu) == 14
+    plane = 1;
+    t = uu(14);
+else
+    t = uu(15);
+end
 
 % Break into sections by rate
 uu_a = uu(1:8);
@@ -79,14 +86,14 @@ if t == 0
     psihat = P.psi0;
     chihat = P.psi0;
     
-    P_a = diag([5*pi/180; 5*pi/180].^2);
+    P_a(:,:,plane) = diag([5*pi/180; 5*pi/180].^2);
     %P_gps = diag([5 5 10 0.01 10 10 0.01].^2);
-    P_gps = diag([0.03, 0.03, 0.1^2, (5*pi/180), 0.2^2, 0.22^2, (5*pi/180)]);
+    P_gps(:,:,plane) = diag([0.03, 0.03, 0.1^2, (5*pi/180), 0.2^2, 0.22^2, (5*pi/180)]);
     
-    uu_a_d1 = [-100, -100, -100];
-    uu_gps_d1 = ones(1,7)*-100;
+    uu_a_d1(:,plane) = ones(8,1)*-100;
+    uu_gps_d1(:,plane) = ones(5,1)*-100;
     
-    xhat_d1 = [...
+    xhat_d1(:,plane) = [...
         pnhat;...1
         pehat;...2
         hhat;...3
@@ -108,38 +115,38 @@ if t == 0
         bzhat;...19
         ];
     
-    lpf_static_pres = P.rho*P.g*(-P.pd0);
-    lpf_diff_press = 0.5*P.rho*P.Va0^2;
+    lpf_static_pres(:,plane) = P.rho*P.g*(-P.pd0);
+    lpf_diff_press(:,plane) = 0.5*P.rho*P.Va0^2;
 else
     
-    pnhat = xhat_d1(1);
-    pehat = xhat_d1(2);
-    hhat  = xhat_d1(3);
-    Vahat = xhat_d1(4);
-    phihat = xhat_d1(7);
-    thetahat = xhat_d1(8);
-    chihat = xhat_d1(9);
-    phat = xhat_d1(10);
-    qhat = xhat_d1(11);
-    rhat = xhat_d1(12);
-    Vghat = xhat_d1(13);
-    wnhat = xhat_d1(14);
-    wehat = xhat_d1(15);
-    psihat = xhat_d1(16);
+    pnhat    = xhat_d1(1,plane);
+    pehat    = xhat_d1(2,plane);
+    hhat     = xhat_d1(3,plane);
+    Vahat    = xhat_d1(4,plane);
+    phihat   = xhat_d1(7,plane);
+    thetahat = xhat_d1(8,plane);
+    chihat   = xhat_d1(9,plane);
+    phat     = xhat_d1(10,plane);
+    qhat     = xhat_d1(11,plane);
+    rhat     = xhat_d1(12,plane);
+    Vghat    = xhat_d1(13,plane);
+    wnhat    = xhat_d1(14,plane);
+    wehat    = xhat_d1(15,plane);
+    psihat   = xhat_d1(16,plane);
     
 end
 
 % Filter Sensors Data
 alpha_pres = 0;
-lpf_static_pres = alpha_pres*lpf_static_pres + (1-alpha_pres)*y_static_pres;
-lpf_diff_press = alpha_pres*lpf_diff_press + (1-alpha_pres)*y_diff_pres;
+lpf_static_pres(:,plane) = alpha_pres*lpf_static_pres(:,plane) + (1-alpha_pres)*y_static_pres;
+lpf_diff_press(:,plane) = alpha_pres*lpf_diff_press(:,plane) + (1-alpha_pres)*y_diff_pres;
 
 % Get values from sensors
 p = y_gyro_x;
 q = y_gyro_y;
 r = y_gyro_z;
-h = lpf_static_pres/(P.rho*P.g);
-Va = sqrt(2/P.rho*lpf_diff_press);
+h = lpf_static_pres(:,plane)/(P.rho*P.g);
+Va = sqrt(2/P.rho*lpf_diff_press(:,plane));
 pn = y_gps_n;
 pe = y_gps_e;
 chi = y_gps_course;
@@ -180,11 +187,11 @@ for i = 1:N
     df_a = [qhat*cos(phihat)*tan(thetahat)-rhat*sin(phihat)*tan(thetahat)      (qhat*sin(phihat)-rhat*cos(phihat))/(cos(thetahat)^2);...
             -qhat*sin(phihat)-rhat*cos(phihat)                                                      0                        ];
     A = df_a;
-    P_a = P_a + P.Ts_estimator*(A*P_a + P_a*A' + Q_a);
+    P_a(:,:,plane) = P_a(:,:,plane) + P.Ts_estimator*(A*P_a(:,:,plane) + P_a(:,:,plane)*A' + Q_a);
 end
 
 % Measurement update
-if any(abs(uu_a - uu_a_d1))
+if any(abs(uu_a - uu_a_d1(:,plane)))
     h_a = [q*Va*sin(thetahat) + P.g*sin(thetahat);...
            r*Va*cos(thetahat) - p*Va*sin(thetahat)-P.g*cos(thetahat)*sin(phihat);...
            -q*Va*cos(thetahat) - P.g*cos(thetahat)*cos(phihat)];
@@ -194,8 +201,8 @@ if any(abs(uu_a - uu_a_d1))
     y = [y_accel_x; y_accel_y; y_accel_z];
     
     Ci_a = dh_a;
-    Li_a = P_a*Ci_a'*inv(Ri_a+Ci_a*P_a*Ci_a');
-    P_a = (eye(2)-Li_a*Ci_a)*P_a;
+    Li_a = P_a(:,:,plane)*Ci_a'*inv(Ri_a+Ci_a*P_a(:,:,plane)*Ci_a');
+    P_a(:,:,plane) = (eye(2)-Li_a*Ci_a)*P_a(:,:,plane);
     xhat_a = xhat_a + Li_a*(y - h_a);
 end
 
@@ -237,11 +244,11 @@ for i = 1:N
               0 0 0 0 0 0 0;...
               0 0 0 0 0 0 0];
     A = df_gps;
-    P_gps = P_gps + P.Ts_estimator*(A*P_gps + P_gps*A' + Q_gps);
+    P_gps(:,:,plane) = P_gps(:,:,plane) + P.Ts_estimator*(A*P_gps(:,:,plane) + P_gps(:,:,plane)*A' + Q_gps);
 end
 
 % Measurement update
-if any(abs(uu_gps - uu_gps_d1))
+if any(abs(uu_gps - uu_gps_d1(:,plane)))
     h_gps = [pnhat; pehat; Vghat; chihat;...
              Va*cos(psihat) + wnhat - Vghat*cos(chihat);...
              Va*sin(psihat) + wehat - Vghat*sin(chihat)];
@@ -253,8 +260,8 @@ if any(abs(uu_gps - uu_gps_d1))
               0 0 -sin(chihat) Vg*cos(chi) 0 1  Va*cos(psihat)];
      
     Ci_gps = dh_gps;
-    Li_gps = P_gps*Ci_gps'*inv(Ri_gps + Ci_gps*P_gps*Ci_gps');
-    P_gps = (eye(7)-Li_gps*Ci_gps)*P_gps;
+    Li_gps = P_gps(:,:,plane)*Ci_gps'*inv(Ri_gps + Ci_gps*P_gps(:,:,plane)*Ci_gps');
+    P_gps(:,:,plane) = (eye(7)-Li_gps*Ci_gps)*P_gps(:,:,plane);
     
     y_gps = [y_gps_n; y_gps_e; y_gps_Vg; y_gps_course; y_wind_n; y_wind_e];
     err = y_gps - h_gps;
@@ -279,14 +286,14 @@ end
 alpha = 0.8;
 alpha_Va = 0.8;
 alpha_h = 0.8;
-hhat = xhat_d1(3)*alpha_h + (1-alpha_h)*h;
-phat = xhat_d1(10)*alpha + (1-alpha)*p;
-qhat = xhat_d1(11)*alpha + (1-alpha)*q;
-rhat = xhat_d1(12)*alpha + (1-alpha)*r;
-Vahat = xhat_d1(4)*alpha_Va + (1-alpha_Va)*Va;
+hhat = xhat_d1(3,plane)*alpha_h + (1-alpha_h)*h;
+phat = xhat_d1(10,plane)*alpha + (1-alpha)*p;
+qhat = xhat_d1(11,plane)*alpha + (1-alpha)*q;
+rhat = xhat_d1(12,plane)*alpha + (1-alpha)*r;
+Vahat = xhat_d1(4,plane)*alpha_Va + (1-alpha_Va)*Va;
 
-uu_a_d1 = uu_a;
-uu_gps_d1 = uu_gps;
+uu_a_d1(:,plane) = uu_a;
+uu_gps_d1(:,plane) = uu_gps;
 xhat = [...
     pnhat;...1
     pehat;...2
@@ -308,5 +315,5 @@ xhat = [...
     byhat;...18
     bzhat;...19
     ];
-xhat_d1 = xhat;
+xhat_d1(:,plane) = xhat;
 end
