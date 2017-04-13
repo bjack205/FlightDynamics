@@ -329,6 +329,7 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
     % lateral autopilot
     % lateral autopilot
     persistent delta_t_d1 delta_e_d1 theta_d1
+    P.F.u_trim = P.u_trim;
     if t==0
         init = true;
         Va = P.Va0;
@@ -341,14 +342,14 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
     % assume no rudder, therefore set delta_r=0
     delta_r = 0;%coordinated_turn_hold(beta, 1, P);
     
-    phi_c   = course_hold(chi_c, chi, r, init, P);
+    phi_c   = course_hold(chi_c, chi, r, init, P.F);
     %phi_c = phi_c + phi_ff;
     phi_err = phi_c-phi;
     lim = 300*pi/180;
     if abs(phi_err) > lim
         phi_c = phi+lim*sign(phi_err);
     end
-    delta_a = roll_hold(phi_c, phi, p, init, P);      
+    delta_a = roll_hold(phi_c, phi, p, init, P.F);      
   
     
     %----------------------------------------------------------
@@ -366,10 +367,10 @@ function [delta, x_command] = autopilot_TECS(Va_c,h_c,chi_c,Va,h,chi,phi,theta,p
     Etot = (Kerr + Uerr)/Knom;
     Ebal = (Uerr - Kerr)/Knom;
     
-    delta_t = TotalEnergy(Etot, init, P);
-    theta_c = EnergyBalance(Ebal, init, P);
+    delta_t = TotalEnergy(Etot, init, P.F);
+    theta_c = EnergyBalance(Ebal, init, P.F);
     %theta_c = alpha_theta*theta_d1 + (1-alpha_theta)*theta_c;
-    delta_e = pitch_hold(theta_c, theta, q, init, P);
+    delta_e = pitch_hold(theta_c, theta, q, init, P.F);
     
     %delta_e = alpha_elev*delta_e_d1 + (1-alpha_elev)*delta_e;
     %delta_t = alpha_throttle*delta_t_d1 + (1-alpha_throttle)*delta_t;

@@ -82,6 +82,10 @@ P.delta_a_max = 45*pi/180;
 P.delta_r_max = 45*pi/180;
 P.delta_e_max = 45*pi/180;
 
+P.F.delta_a_max = 45*pi/180;
+P.F.delta_r_max = 45*pi/180;
+P.F.delta_e_max = 45*pi/180;
+
 % Sensor data
 P.sigma_gyro_x = 0.13*pi/180;
 P.sigma_gyro_y = 0.13*pi/180;
@@ -195,29 +199,8 @@ P.zeta_v2 = 1;
 P.wn_v = 1;
 P.zeta_v = 0.9;
 
-% compute different transfer functions
-[T,P]= compute_tf_model(x_trim,u_trim,P);
-
 %%%%%% Total Energy Control %%%%%%
 P.h_e = 20;  
-
-% P.kp_E = 1;
-% P.kd_E = 2;
-% P.ki_E = 0.5;
-% 
-% P.kp_B = 2.5;
-% P.kd_B = 1.5;
-% P.ki_B = 0.5;
-
-% % throttle
-% P.kp_E = 1;
-% P.kd_E = 0.8*P.kp_E;
-% P.ki_E = 0.5*P.kp_E;
-% 
-% % theta
-% P.kp_B = 1;
-% P.kd_B = 0.75*P.kp_B;
-% P.ki_B = 0.5*P.kp_B;
 
 % throttle
 P.kp_E = 1;
@@ -243,17 +226,51 @@ P.k_path = 0.005;
 P.k_orbit = 2;
 P.gamma_max = 45;
 
+
+
+
 %%%%% Plane Following Gains %%%%
+%P.follow_frame = 'vehicle-1';
 P.follow_frame = 'body';
 
-P.Va_max = 35;
+P.Va_max = 50;
 P.Va_min = 25;
-P.delta_x_max = 500;
+P.delta_x_max = 50;
 P.n_Va = 3; % Needs to be odd
 
-P.k_follow = 0.01;
+P.k_follow = 0.005;
 P.chi_inf_follow = 70*pi/180;
 
+
+% Roll attitude
+P.F.e_phi_max = 100*pi/180;
+P.F.zeta_phi = 6;
+
+% Course Hold
+P.F.W_chi = 10; % >5
+P.F.zeta_chi = 1.2;
+P.F.phi_max = 60*pi/180;
+
+% Pitch attitude
+P.F.e_theta_max = 45*pi/180;
+P.F.zeta_theta = 0.9;
+
+% throttle
+P.F.kp_E = 1;
+P.F.kd_E = 2;
+P.F.ki_E = 0.5;
+
+% theta
+P.F.kp_B = 2.5;
+P.F.kd_B = 1.5;
+P.F.ki_B = 0.5;
+
+P.F.Tau = P.Tau; P.F.Ts = P.Ts;
+P.F.gamma_max = 45;
+
+
+% compute different transfer functions
+[T,P]= compute_tf_model(x_trim,u_trim,P);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%% Filtering %%%%%%%%%%%%%%%%%%%

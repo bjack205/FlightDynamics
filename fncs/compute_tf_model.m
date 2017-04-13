@@ -95,4 +95,21 @@ P.kp_v2 = (a_V1 - 2*P.zeta_v2*P.wn_v2)/(P.Kdc_theta*P.g);
 P.ki_v = P.wn_v^2^2/a_V2;
 P.kp_v = (2*P.zeta_v*P.wn_v - a_V1)/a_V2;
 
+%% Gains for Follower
+% Roll Attitude
+P.F.kp_phi = P.F.delta_a_max/P.F.e_phi_max*sign(a_phi2);
+P.F.wn_phi = sqrt(abs(a_phi2)*P.F.delta_a_max/P.F.e_phi_max);
+P.F.kd_phi = (2*P.F.zeta_phi*P.F.wn_phi-a_phi1)/a_phi2;
+
+% Course Hold
+Vg = Va_trim;
+P.F.wn_chi = P.F.wn_phi/P.F.W_chi;
+P.F.kp_chi = 2*P.F.zeta_chi*P.F.wn_chi*Vg/P.g;
+P.F.ki_chi = P.F.wn_chi^2*Vg/P.g;
+
+% Pitch Attitude
+P.F.kp_theta = P.F.delta_e_max/P.F.e_theta_max*sign(a_theta3);
+P.F.wn_theta = sqrt(a_theta2 + P.F.delta_e_max/P.F.e_theta_max*abs(a_theta3));
+P.F.kd_theta = -(2*P.F.zeta_theta*P.F.wn_theta - a_theta1)/a_theta3;
+P.F.Kdc_theta = P.F.kp_theta*a_theta3/(a_theta2 + P.F.kp_theta*a_theta3);
 
